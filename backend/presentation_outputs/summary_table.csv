@@ -1,0 +1,6 @@
+section,name,date_start,date_end,rows,unique_weeks,winner,holdout_rmse,rolling_rmse,naive_rmse,mae,mape_pct,notes
+dataset,v1,2023-03-15,2024-12-31,416,85.0,,,,,,,Key missing total=54
+dataset,v2,2023-03-15,2025-10-30,701,128.0,,,,,,,Key missing total=0
+dataset,v3,2020-01-02,2025-10-30,1190,273.0,,,,,,,Key missing total=3248
+experiment,experiment_a,2020-04-05,2025-11-02,292,,Hybrid_ARIMAX_LSTM,218.52645183773163,141.80414797054627,237.73656500083328,171.9896551232265,5.6469209963542575,Rolling winner=ARIMA
+experiment,experiment_b,2023-06-04,2025-11-02,127,,ARIMA,113.41923980014452,143.32260822019177,113.08984779597883,103.13279352745744,3.4908986528546877,Rolling winner=ARIMA

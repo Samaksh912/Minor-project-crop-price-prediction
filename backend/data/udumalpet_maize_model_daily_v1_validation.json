@@ -1,0 +1,156 @@
+{
+  "selected_market": "Udumalpet",
+  "selection_reason": "Selected as the strongest maize market by unique trading-day coverage, then span length, then total rows, using the existing v3 market panel.",
+  "market_ranking_top10": [
+    {
+      "market_name": "Udumalpet",
+      "rows": 862,
+      "unique_days": 862,
+      "start": "2020-01-06T00:00:00",
+      "end": "2025-10-30T00:00:00",
+      "modal_missing": 0,
+      "varieties": 2,
+      "span_days": 2124
+    },
+    {
+      "market_name": "Vadavalli(Uzhavar Sandhai )",
+      "rows": 447,
+      "unique_days": 447,
+      "start": "2024-07-16T00:00:00",
+      "end": "2025-10-30T00:00:00",
+      "modal_missing": 0,
+      "varieties": 1,
+      "span_days": 471
+    },
+    {
+      "market_name": "Mettupalayam(Uzhavar Sandhai )",
+      "rows": 445,
+      "unique_days": 445,
+      "start": "2024-07-16T00:00:00",
+      "end": "2025-10-30T00:00:00",
+      "modal_missing": 0,
+      "varieties": 1,
+      "span_days": 471
+    },
+    {
+      "market_name": "RSPuram(Uzhavar Sandhai )",
+      "rows": 436,
+      "unique_days": 436,
+      "start": "2024-07-16T00:00:00",
+      "end": "2025-10-30T00:00:00",
+      "modal_missing": 0,
+      "varieties": 1,
+      "span_days": 471
+    },
+    {
+      "market_name": "Tiruppur (North) (Uzhavar Sandhai )",
+      "rows": 159,
+      "unique_days": 159,
+      "start": "2024-08-04T00:00:00",
+      "end": "2025-10-24T00:00:00",
+      "modal_missing": 0,
+      "varieties": 1,
+      "span_days": 446
+    },
+    {
+      "market_name": "Madathukulam",
+      "rows": 118,
+      "unique_days": 118,
+      "start": "2020-01-17T00:00:00",
+      "end": "2024-06-13T00:00:00",
+      "modal_missing": 0,
+      "varieties": 1,
+      "span_days": 1609
+    },
+    {
+      "market_name": "Pollachi",
+      "rows": 117,
+      "unique_days": 117,
+      "start": "2020-07-10T00:00:00",
+      "end": "2022-04-22T00:00:00",
+      "modal_missing": 0,
+      "varieties": 1,
+      "span_days": 651
+    },
+    {
+      "market_name": "Pethappampatti",
+      "rows": 108,
+      "unique_days": 108,
+      "start": "2020-02-19T00:00:00",
+      "end": "2024-05-31T00:00:00",
+      "modal_missing": 0,
+      "varieties": 2,
+      "span_days": 1563
+    },
+    {
+      "market_name": "Singanallur(Uzhavar Sandhai )",
+      "rows": 94,
+      "unique_days": 94,
+      "start": "2024-07-24T00:00:00",
+      "end": "2025-10-30T00:00:00",
+      "modal_missing": 0,
+      "varieties": 1,
+      "span_days": 463
+    },
+    {
+      "market_name": "Annur",
+      "rows": 85,
+      "unique_days": 85,
+      "start": "2020-01-02T00:00:00",
+      "end": "2024-06-18T00:00:00",
+      "modal_missing": 0,
+      "varieties": 1,
+      "span_days": 1629
+    }
+  ],
+  "single_market_dataset": {
+    "path": "/home/arnavbansal/Samaksh_m/backend/data/udumalpet_maize_model_daily_v1.csv",
+    "date_start": "2020-01-06",
+    "date_end": "2025-10-30",
+    "rows": 862,
+    "unique_weeks": 225,
+    "missingness": {
+      "modal_price": 0,
+      "min_price": 0,
+      "max_price": 0,
+      "markets_reporting": 0,
+      "varieties_reporting": 0,
+      "rows_reporting": 0,
+      "tavg": 0,
+      "tmin": 0,
+      "tmax": 0,
+      "prcp": 0,
+      "wdir": 0,
+      "wspd": 0,
+      "pres": 0,
+      "msp_applicable": 234,
+      "msp_value_per_quintal": 234,
+      "govt_procurement_active": 234,
+      "pmfby_insurance_active": 234,
+      "state_scheme_active": 234,
+      "harvest_season_active": 234,
+      "price_impact_direction": 234
+    },
+    "variety_coverage": {
+      "total_unique_varieties": 2,
+      "varieties": [
+        "Deshi Red",
+        "Hybrid Red (Cattle Feed)"
+      ],
+      "median_varieties_per_day": 1.0
+    }
+  },
+  "district_average_v3": {
+    "path": "/home/arnavbansal/Samaksh_m/backend/data/coimbatore_maize_model_daily_v3.csv",
+    "date_start": "2020-01-02",
+    "date_end": "2025-10-30",
+    "rows": 1190,
+    "unique_weeks": 273
+  },
+  "comparison_against_district_average_v3": {
+    "row_delta": -328,
+    "unique_week_delta": -48,
+    "policy_complete_in_single_market": false,
+    "single_market_has_cleaner_target_series_hypothesis": true
+  }
+}

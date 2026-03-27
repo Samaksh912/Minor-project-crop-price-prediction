@@ -1,0 +1,5 @@
+model_name,rmse,mae,mape_pct,notes
+ARIMA,143.32260822019177,129.2593288241702,4.301846723658011,
+Tabular,194.4629174405823,168.16438899057457,5.576168268752802,Tabular model: GradientBoostingRegressor
+ARIMAX,205.3763459093185,185.18433702615306,6.211692593319828,SARIMAX optimizer reported non-convergence on holdout fit.
+Hybrid_ARIMAX_LSTM,210.42012762358618,186.9718872505949,6.26648717432992,ARIMAX base optimizer reported non-convergence on holdout fit.

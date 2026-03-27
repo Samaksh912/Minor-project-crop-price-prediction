@@ -1,0 +1,125 @@
+{
+  "weather_source": {
+    "provider": "NASA POWER Daily API",
+    "url": "https://power.larc.nasa.gov/api/temporal/daily/point",
+    "community": "AG",
+    "latitude": 11.0168,
+    "longitude": 76.9558,
+    "elevation_m": 540.94,
+    "parameters": [
+      "T2M",
+      "T2M_MIN",
+      "T2M_MAX",
+      "PRECTOTCORR",
+      "WD10M",
+      "WS10M",
+      "PS"
+    ],
+    "transformations": {
+      "wspd": "WS10M converted from m/s to km/h",
+      "pres": "PS converted from kPa surface pressure to approximate sea-level hPa using site elevation"
+    }
+  },
+  "v1": {
+    "path": "/home/arnavbansal/Samaksh_m/backend/data/coimbatore_maize_model_daily.csv",
+    "date_start": "2023-03-15",
+    "date_end": "2024-12-31",
+    "rows": 416,
+    "unique_weeks": 85,
+    "missingness": {
+      "modal_price": 0,
+      "tavg": 6,
+      "tmin": 7,
+      "tmax": 6,
+      "prcp": 7,
+      "wdir": 9,
+      "wspd": 9,
+      "pres": 10,
+      "msp_applicable": 0,
+      "msp_value_per_quintal": 0,
+      "govt_procurement_active": 0,
+      "pmfby_insurance_active": 0,
+      "state_scheme_active": 0,
+      "harvest_season_active": 0,
+      "price_impact_direction": 0
+    }
+  },
+  "v2": {
+    "path": "/home/arnavbansal/Samaksh_m/backend/data/coimbatore_maize_model_daily_v2.csv",
+    "date_start": "2023-03-15",
+    "date_end": "2025-10-30",
+    "rows": 701,
+    "unique_weeks": 128,
+    "missingness": {
+      "modal_price": 0,
+      "tavg": 0,
+      "tmin": 0,
+      "tmax": 0,
+      "prcp": 0,
+      "wdir": 0,
+      "wspd": 0,
+      "pres": 0,
+      "msp_applicable": 0,
+      "msp_value_per_quintal": 0,
+      "govt_procurement_active": 0,
+      "pmfby_insurance_active": 0,
+      "state_scheme_active": 0,
+      "harvest_season_active": 0,
+      "price_impact_direction": 0
+    }
+  },
+  "v3": {
+    "path": "/home/arnavbansal/Samaksh_m/backend/data/coimbatore_maize_model_daily_v3.csv",
+    "date_start": "2020-01-02",
+    "date_end": "2025-10-30",
+    "rows": 1190,
+    "unique_weeks": 273,
+    "missingness": {
+      "modal_price": 0,
+      "tavg": 0,
+      "tmin": 0,
+      "tmax": 0,
+      "prcp": 0,
+      "wdir": 0,
+      "wspd": 0,
+      "pres": 0,
+      "msp_applicable": 464,
+      "msp_value_per_quintal": 464,
+      "govt_procurement_active": 464,
+      "pmfby_insurance_active": 464,
+      "state_scheme_active": 464,
+      "harvest_season_active": 464,
+      "price_impact_direction": 464
+    }
+  },
+  "comparison": {
+    "zip_source": {
+      "start": "2020-01-02",
+      "end": "2025-05-04",
+      "rows": 1595,
+      "days": 840
+    },
+    "current_raw_source": {
+      "start": "2023-03-15",
+      "end": "2025-10-30",
+      "rows": 2415,
+      "days": 701
+    },
+    "combined_v3_source": {
+      "start": "2020-01-02",
+      "end": "2025-10-30",
+      "rows": 3116,
+      "days": 1190,
+      "shared_normalized_rows_deduped": 894
+    },
+    "why_v3_is_better_or_not_better_than_v2": "V3 has a much longer real maize price history and more weekly coverage than V2 because it unions the ZIP historical maize source with the newer raw maize source, using ZIP rows as preferred when normalized duplicates exist. However, V3 is not a clean drop-in replacement for V2 for modeling yet because the existing MSP/policy file only begins in 2023-03, so pre-2023 rows in V3 have missing policy fields.",
+    "msp_coverage_complete_v1": true,
+    "msp_coverage_complete_v2": true,
+    "msp_coverage_complete_v3": false,
+    "weather_coverage_complete_v1": false,
+    "weather_coverage_complete_v2": true,
+    "weather_coverage_complete_v3": true,
+    "ready_to_replace_v2": false,
+    "ready_to_replace_v2_reason": "Not yet. V3 is the strongest real price/weather dataset, but it extends back before the available policy/MSP history. Without a deliberate policy-history decision, switching the backend directly to V3 would introduce incomplete policy coverage in the early period."
+  }
+}
