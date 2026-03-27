@@ -1,0 +1,5 @@
+model,rmse,mae,mape_pct
+ARIMA,849.12,731.47,11.12
+ARIMAX,5324.5,4561.13,70.16
+Hybrid_ARIMAX_LSTM,5324.5,4561.13,70.16
+Standalone_LSTM,,,
