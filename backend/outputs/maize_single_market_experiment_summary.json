@@ -1,0 +1,315 @@
+{
+  "selected_market": "Udumalpet",
+  "single_market_dataset": {
+    "path": "/home/arnavbansal/Samaksh_m/backend/data/udumalpet_maize_model_daily_v1.csv",
+    "date_start": "2020-01-06",
+    "date_end": "2025-10-30",
+    "rows": 862,
+    "unique_weeks": 225,
+    "missingness": {
+      "modal_price": 0,
+      "min_price": 0,
+      "max_price": 0,
+      "markets_reporting": 0,
+      "varieties_reporting": 0,
+      "rows_reporting": 0,
+      "tavg": 0,
+      "tmin": 0,
+      "tmax": 0,
+      "prcp": 0,
+      "wdir": 0,
+      "wspd": 0,
+      "pres": 0,
+      "msp_applicable": 234,
+      "msp_value_per_quintal": 234,
+      "govt_procurement_active": 234,
+      "pmfby_insurance_active": 234,
+      "state_scheme_active": 234,
+      "harvest_season_active": 234,
+      "price_impact_direction": 234
+    },
+    "variety_coverage": {
+      "total_unique_varieties": 2,
+      "varieties": [
+        "Deshi Red",
+        "Hybrid Red (Cattle Feed)"
+      ],
+      "median_varieties_per_day": 1.0
+    }
+  },
+  "single_market_experiment_a": {
+    "name": "single_market_experiment_a",
+    "rows": 291,
+    "date_start": "2020-04-12",
+    "date_end": "2025-11-02",
+    "train_size": 232,
+    "test_size": 59,
+    "exog_columns": [
+      "tavg",
+      "tmin",
+      "tmax",
+      "prcp",
+      "wdir",
+      "wspd",
+      "pres",
+      "temp_anomaly",
+      "rain_anomaly"
+    ],
+    "comparison_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_single_market_experiment_a_holdout_model_comparison.csv",
+    "predictions_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_single_market_experiment_a_holdout_predictions.csv",
+    "holdout_results": {
+      "ARIMA": {
+        "metrics": {
+          "rmse": 697.146489835496,
+          "mae": 584.085124605385,
+          "mape_pct": 15.226107871792442
+        },
+        "notes": []
+      },
+      "ARIMAX": {
+        "metrics": {
+          "rmse": 816.0682578040028,
+          "mae": 712.0960924309413,
+          "mape_pct": 18.77371406235757
+        },
+        "notes": []
+      },
+      "Tabular": {
+        "metrics": {
+          "rmse": 697.9125799330131,
+          "mae": 585.2928357352943,
+          "mape_pct": 15.270637707332119
+        },
+        "notes": [
+          "Tabular model: GradientBoostingRegressor"
+        ]
+      },
+      "Hybrid_ARIMAX_LSTM": {
+        "metrics": {
+          "rmse": 739.0330257366624,
+          "mae": 625.3789728125661,
+          "mape_pct": 16.345073603690903
+        },
+        "notes": []
+      }
+    },
+    "naive_last_value_baseline": {
+      "rmse": 714.3722035342407,
+      "mae": 597.2558514931397,
+      "mape_pct": 15.557101994908404
+    },
+    "winner": "ARIMA",
+    "winner_metrics": {
+      "rmse": 697.146489835496,
+      "mae": 584.085124605385,
+      "mape_pct": 15.226107871792442
+    },
+    "rolling": {
+      "splits_evaluated": 3,
+      "comparison_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_single_market_experiment_a_rolling_model_comparison.csv",
+      "results": {
+        "ARIMA": {
+          "metrics": {
+            "rmse": 407.60999148336066,
+            "mae": 347.8357859252422,
+            "mape_pct": 9.058866807438628
+          },
+          "notes": []
+        },
+        "ARIMAX": {
+          "metrics": {
+            "rmse": 405.8017439599258,
+            "mae": 342.39171332322707,
+            "mape_pct": 8.911148734553226
+          },
+          "notes": [
+            "SARIMAX optimizer reported non-convergence on holdout fit."
+          ]
+        },
+        "Tabular": {
+          "metrics": {
+            "rmse": 556.0607415566012,
+            "mae": 480.0148528332168,
+            "mape_pct": 12.569185762237826
+          },
+          "notes": [
+            "Tabular model: GradientBoostingRegressor"
+          ]
+        },
+        "Hybrid_ARIMAX_LSTM": {
+          "metrics": {
+            "rmse": 396.38743843066317,
+            "mae": 333.1511636560263,
+            "mape_pct": 8.673889087414892
+          },
+          "notes": [
+            "ARIMAX base optimizer reported non-convergence on holdout fit."
+          ]
+        }
+      },
+      "winner": "Hybrid_ARIMAX_LSTM",
+      "winner_metrics": {
+        "rmse": 396.38743843066317,
+        "mae": 333.1511636560263,
+        "mape_pct": 8.673889087414892
+      }
+    }
+  },
+  "single_market_experiment_b": {
+    "name": "single_market_experiment_b",
+    "rows": 127,
+    "date_start": "2023-06-04",
+    "date_end": "2025-11-02",
+    "train_size": 101,
+    "test_size": 26,
+    "exog_columns": [
+      "tavg",
+      "tmin",
+      "tmax",
+      "prcp",
+      "wdir",
+      "wspd",
+      "pres",
+      "temp_anomaly",
+      "rain_anomaly",
+      "msp_applicable",
+      "msp_value_per_quintal",
+      "govt_procurement_active",
+      "pmfby_insurance_active",
+      "state_scheme_active",
+      "harvest_season_active",
+      "dir_downward",
+      "dir_neutral",
+      "dir_upward"
+    ],
+    "comparison_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_single_market_experiment_b_holdout_model_comparison.csv",
+    "predictions_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_single_market_experiment_b_holdout_predictions.csv",
+    "holdout_results": {
+      "ARIMA": {
+        "metrics": {
+          "rmse": 289.86799555774365,
+          "mae": 271.2441427986448,
+          "mape_pct": 7.021135713200363
+        },
+        "notes": []
+      },
+      "ARIMAX": {
+        "metrics": {
+          "rmse": 264.5060020127888,
+          "mae": 220.5162933193178,
+          "mape_pct": 5.962916586276428
+        },
+        "notes": [
+          "SARIMAX optimizer reported non-convergence on holdout fit."
+        ]
+      },
+      "Tabular": {
+        "metrics": {
+          "rmse": 517.7545223726812,
+          "mae": 469.9684781062185,
+          "mape_pct": 11.976165749698817
+        },
+        "notes": [
+          "Tabular model: GradientBoostingRegressor"
+        ]
+      },
+      "Hybrid_ARIMAX_LSTM": {
+        "metrics": {
+          "rmse": 377.6053920566316,
+          "mae": 341.538856599231,
+          "mape_pct": 8.692220319768223
+        },
+        "notes": [
+          "ARIMAX base optimizer reported non-convergence on holdout fit."
+        ]
+      }
+    },
+    "naive_last_value_baseline": {
+      "rmse": 262.7683066424762,
+      "mae": 244.87179487179492,
+      "mape_pct": 6.401589894079282
+    },
+    "winner": "ARIMAX",
+    "winner_metrics": {
+      "rmse": 264.5060020127888,
+      "mae": 220.5162933193178,
+      "mape_pct": 5.962916586276428
+    },
+    "rolling": {
+      "splits_evaluated": 3,
+      "comparison_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_single_market_experiment_b_rolling_model_comparison.csv",
+      "results": {
+        "ARIMA": {
+          "metrics": {
+            "rmse": 389.7451167544741,
+            "mae": 334.49085976066647,
+            "mape_pct": 8.705116170077103
+          },
+          "notes": []
+        },
+        "ARIMAX": {
+          "metrics": {
+            "rmse": 467.62246383525746,
+            "mae": 375.45094190452943,
+            "mape_pct": 9.874950351317786
+          },
+          "notes": [
+            "SARIMAX optimizer reported non-convergence on holdout fit."
+          ]
+        },
+        "Tabular": {
+          "metrics": {
+            "rmse": 528.0723665111578,
+            "mae": 461.18770769927784,
+            "mape_pct": 12.111656524874373
+          },
+          "notes": [
+            "Tabular model: GradientBoostingRegressor"
+          ]
+        },
+        "Hybrid_ARIMAX_LSTM": {
+          "metrics": {
+            "rmse": 431.46376953133085,
+            "mae": 364.6364524881944,
+            "mape_pct": 9.381548941648424
+          },
+          "notes": [
+            "ARIMAX base optimizer reported non-convergence on holdout fit."
+          ]
+        }
+      },
+      "winner": "ARIMA",
+      "winner_metrics": {
+        "rmse": 389.7451167544741,
+        "mae": 334.49085976066647,
+        "mape_pct": 8.705116170077103
+      }
+    }
+  },
+  "district_average_reference": {
+    "summary_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_split_experiment_summary.json",
+    "demo_regime": "experiment_b",
+    "research_regime": "experiment_a",
+    "demo_holdout_rmse": 113.41923980014452,
+    "demo_rolling_rmse": 143.32260822019177,
+    "research_holdout_rmse": 218.52645183773163,
+    "research_rolling_rmse": 141.80414797054627
+  },
+  "comparison_against_district_average": {
+    "single_market_demo_regime": "single_market_experiment_b",
+    "single_market_demo_holdout_rmse": 264.5060020127888,
+    "single_market_demo_rolling_rmse": 389.7451167544741,
+    "district_demo_holdout_rmse": 113.41923980014452,
+    "district_demo_rolling_rmse": 143.32260822019177,
+    "holdout_rmse_improvement_vs_district_demo": -151.08676221264432,
+    "rolling_rmse_improvement_vs_district_demo": -246.42250853428234,
+    "single_market_reduced_optimizer_issues": false
+  },
+  "recommendation": {
+    "single_market_demo_regime": "single_market_experiment_b",
+    "single_market_research_regime": "single_market_experiment_b",
+    "demo_baseline_choice": "stay with district-average maize",
+    "research_baseline_choice": "stay with district-average maize",
+    "rationale": "A single-market setup is preferred only if it improves recent holdout RMSE materially and does not regress rolling stability. Otherwise the district-average regime remains the safer baseline."
+  }
+}

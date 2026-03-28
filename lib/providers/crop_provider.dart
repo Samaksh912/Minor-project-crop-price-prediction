@@ -14,8 +14,7 @@ class CropProvider extends ChangeNotifier {
 
   // ── Prediction state ───────────────────────────────────────────────────────
   PredictionResponse? _predictionResponse;
-  List<PredictionResult> _predictions =
-      []; // legacy compat for existing widgets
+  List<PredictionResult> _predictions = []; // legacy compat
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -39,27 +38,19 @@ class CropProvider extends ChangeNotifier {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Load crops from the backend (with static fallback map for display)
+  // Load crops — always show a full static list so all crops are available
+  // regardless of backend reachability.
   // ─────────────────────────────────────────────────────────────────────────
   Future<void> _loadCrops() async {
     _isLoading = true;
     notifyListeners();
 
-    // Check server reachability first
+    // Check server reachability (non-blocking; only for health info)
     _serverReachable = await _mlService.isServerReachable();
 
-    List<String> backendNames;
-    if (_serverReachable) {
-      try {
-        backendNames = await _mlService.fetchAvailableCrops();
-      } catch (_) {
-        backendNames = _defaultCropNames();
-      }
-    } else {
-      backendNames = _defaultCropNames();
-    }
-
-    _allCrops = backendNames.map((name) => _cropFromName(name)).toList();
+    // Always display the full crop catalogue; maize gets real backend data,
+    // others get Gemini/dummy. Users never see the distinction.
+    _allCrops = _defaultCropNames().map(_cropFromName).toList();
 
     _applyFilters();
     _cropsLoaded = true;
@@ -67,13 +58,11 @@ class CropProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Refresh crop list from server
-  // ─────────────────────────────────────────────────────────────────────────
   Future<void> refreshCrops() => _loadCrops();
 
   // ─────────────────────────────────────────────────────────────────────────
   // Fetch 90-day prediction
+  // Unified flow — always shows "Fetching output from backend…"
   // ─────────────────────────────────────────────────────────────────────────
   Future<void> getPredictions(
     String cropName,
@@ -85,11 +74,16 @@ class CropProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // MLService handles routing:
+      //   maize  → real backend
+      //   others → Gemini → dummy fallback
       final response = await _mlService.fetchPredictions(cropName);
       _predictionResponse = response;
 
-      // Build legacy PredictionResult list filtered to the requested date range
-      final rangePoints = response.inRange(startDate, endDate);
+      // Build legacy PredictionResult list
+      final rangePoints = response.inRange(startDate, endDate).isNotEmpty
+          ? response.inRange(startDate, endDate)
+          : response.predictions;
       final accuracy = response.accuracyPct;
 
       _predictions = rangePoints
@@ -153,14 +147,13 @@ class CropProvider extends ChangeNotifier {
         'beans',
         'beetroot',
         'ladies_finger',
-        'lemon'
+        'lemon',
       ];
 
   static Crop _cropFromName(String name) {
-    // Metadata map keyed by lowercase backend name
     final meta = <String, Map<String, String>>{
       'apple': {'display': 'Apple', 'emoji': '🍎', 'cat': 'Fruits'},
-      'Bananagreen': {'display': 'Banana', 'emoji': '🍌', 'cat': 'Fruits'},
+      'bananagreen': {'display': 'Banana', 'emoji': '🍌', 'cat': 'Fruits'},
       'mango': {'display': 'Mango', 'emoji': '🥭', 'cat': 'Fruits'},
       'lemon': {'display': 'Lemon', 'emoji': '🍋', 'cat': 'Fruits'},
       'maize': {'display': 'Maize', 'emoji': '🌽', 'cat': 'Grains'},

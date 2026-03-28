@@ -1,156 +1,237 @@
-"""
-predictor.py
-------------
-Inference wrapper: loads saved ARIMAX + LSTM artifacts and produces
-a 90-day forecast. Falls back to training if no saved model is found.
-Also orchestrates output generation (CSVs, plots).
-"""
+from __future__ import annotations
 
-import os
+import json
 import logging
+import os
 
+os.environ.setdefault("TF_ENABLE_ONEDNN_OPTS", "0")
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
+os.environ.setdefault(
+    "MPLCONFIGDIR",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), ".mplconfig"),
+)
+os.makedirs(os.environ["MPLCONFIGDIR"], exist_ok=True)
+
+import joblib
 import numpy as np
 import pandas as pd
-import joblib
-
-import tensorflow as tf
 from tensorflow.keras.models import load_model
 
-from config import (
-    MODELS_DIR, DATE_COL, PRICE_COL,
-    FORECAST_HORIZON, FORECAST_DAYS, LSTM_WINDOW,
-)
+from config import DATE_COL, FORECAST_HORIZON, LSTM_WINDOW, OUTPUTS_DIR, PRICE_COL
+from evaluation import compare_models
 from model import (
-    _arimax_path, _lstm_path, _scaler_path, _meta_path,
-    model_exists, train_hybrid, _lstm_autoregressive_forecast,
-)
-from visualizer import (
-    plot_actual_vs_predicted, plot_all_models, plot_residuals,
-    plot_feature_correlations, plot_forecast, plot_model_metrics_bar,
+    _artifact_paths,
+    _interpolate_weekly_to_daily,
+    _lstm_autoregressive_forecast,
+    _recursive_tabular_forecast,
+    _tile_future_exog,
+    model_exists,
+    train_hybrid,
 )
 from output_generator import (
-    save_predictions_csv, save_forecast_csv, save_model_comparison_csv,
+    save_forecast_csv,
+    save_model_comparison_csv,
+    save_predictions_csv,
+)
+from visualizer import (
+    plot_actual_vs_predicted,
+    plot_all_model_comparison,
+    plot_feature_correlations,
+    plot_forecast,
+    plot_model_metrics_comparison,
+    plot_residuals,
 )
 
-logger = logging.getLogger(__name__)
+
+LOGGER = logging.getLogger(__name__)
 
 
-def predict(crop_name: str, aligned_df: pd.DataFrame, force_retrain: bool = False) -> dict:
-    """
-    Produce a 90-day price forecast for *crop_name*.
-    Trains if no model exists. Generates all output files.
-    """
-    # ------------------------------------------------------------------
-    # Train or re-train
-    # ------------------------------------------------------------------
+def predict(crop_name: str, df: pd.DataFrame, force_retrain=False) -> dict:
     if force_retrain or not model_exists(crop_name):
-        logger.info("[%s] Training model …", crop_name)
-        result = train_hybrid(aligned_df, crop_name)
-        _generate_outputs(crop_name, result, aligned_df)
+        LOGGER.info("Artifacts missing or retrain requested; training fresh model for %s", crop_name)
+        result = train_hybrid(df=df, crop_name=crop_name)
+        _generate_outputs(crop_name, result, df)
         return result
 
-    # ------------------------------------------------------------------
-    # Load saved artifacts for inference
-    # ------------------------------------------------------------------
-    logger.info("[%s] Loading saved model …", crop_name)
-    arimax_fit = joblib.load(_arimax_path(crop_name))
-    scaler     = joblib.load(_scaler_path(crop_name))
-    meta       = joblib.load(_meta_path(crop_name))
+    artifact_paths = _artifact_paths(crop_name)
+    meta = joblib.load(artifact_paths["meta"])
+    best_model_name = meta["best_model_name"]
+    last_date = pd.Timestamp(meta["last_date"])
+    first_date = pd.Timestamp(meta.get("first_date", pd.to_datetime(df[DATE_COL]).iloc[0]))
+    last_actual = float(df[PRICE_COL].iloc[-1])
 
-    last_date    = meta["last_date"]
-    last_X_row   = meta["last_X_row"]
-    exog_columns = meta["exog_columns"]
-    metrics      = meta.get("hybrid_metrics", meta.get("metrics", {}))
-    all_metrics  = meta.get("all_metrics", {})
+    try:
+        if best_model_name == "ARIMA":
+            arima_model = joblib.load(artifact_paths["arima"])
+            weekly_forecast = np.asarray(arima_model.forecast(steps=FORECAST_HORIZON), dtype=float)
 
-    # ARIMAX forecast
-    if exog_columns:
-        future_exog = pd.DataFrame(
-            np.tile(last_X_row, (FORECAST_HORIZON, 1)),
-            columns=exog_columns,
-        )
-    else:
-        future_exog = None
+        elif best_model_name == "ARIMAX":
+            arimax_model = joblib.load(artifact_paths["arimax"])
+            last_x_row = pd.Series(meta["last_X_row"], index=meta["exog_columns"], dtype=float)
+            future_exog = _tile_future_exog(last_x_row, FORECAST_HORIZON)
+            weekly_forecast = np.asarray(
+                arimax_model.forecast(steps=FORECAST_HORIZON, exog=future_exog),
+                dtype=float,
+            )
 
-    arimax_fc = arimax_fit.forecast(steps=FORECAST_HORIZON, exog=future_exog).values
+        elif best_model_name == "Hybrid_ARIMAX_LSTM":
+            arimax_model = joblib.load(artifact_paths["arimax"])
+            residual_model = load_model(artifact_paths["lstm"])
+            residual_scaler = joblib.load(artifact_paths["scaler"])
+            exog_columns = meta["exog_columns"]
+            last_x_row = pd.Series(meta["last_X_row"], index=exog_columns, dtype=float)
+            future_exog = _tile_future_exog(last_x_row, FORECAST_HORIZON)
+            base_forecast = np.asarray(
+                arimax_model.forecast(steps=FORECAST_HORIZON, exog=future_exog),
+                dtype=float,
+            )
+            fitted_values = np.asarray(arimax_model.fittedvalues, dtype=float)
+            residuals = df[PRICE_COL].astype(float).to_numpy() - fitted_values
+            scaled_residuals = residual_scaler.transform(residuals.reshape(-1, 1)).reshape(-1)
+            if len(scaled_residuals) < LSTM_WINDOW:
+                raise RuntimeError("Not enough residual history to seed hybrid inference")
+            residual_forecast = _lstm_autoregressive_forecast(
+                model=residual_model,
+                last_seq=scaled_residuals[-LSTM_WINDOW:],
+                steps=FORECAST_HORIZON,
+                scaler=residual_scaler,
+            )
+            weekly_forecast = base_forecast + residual_forecast
 
-    # LSTM residual forecast
-    lstm_path = _lstm_path(crop_name)
-    if os.path.exists(lstm_path):
-        lstm_model = load_model(lstm_path)
-        y_series = aligned_df[PRICE_COL].values
-        fitted   = arimax_fit.fittedvalues.values
-        n = min(len(y_series), len(fitted))
-        residuals = y_series[-n:] - fitted[-n:]
-        scaled_res = scaler.transform(residuals.reshape(-1, 1))
-        last_seq = scaled_res[-LSTM_WINDOW:].reshape(1, LSTM_WINDOW, 1)
-        lstm_fc = _lstm_autoregressive_forecast(lstm_model, last_seq, FORECAST_HORIZON, scaler)
-    else:
-        lstm_fc = np.zeros(FORECAST_HORIZON)
+        elif best_model_name == "Standalone_LSTM":
+            price_model = load_model(artifact_paths["lstm"])
+            price_scaler = joblib.load(artifact_paths["price_scaler"])
+            price_history = df[PRICE_COL].astype(float).to_numpy()
+            if len(price_history) < LSTM_WINDOW:
+                raise RuntimeError("Not enough price history to seed standalone LSTM inference")
+            scaled_prices = price_scaler.transform(price_history.reshape(-1, 1)).reshape(-1)
+            weekly_forecast = _lstm_autoregressive_forecast(
+                model=price_model,
+                last_seq=scaled_prices[-LSTM_WINDOW:],
+                steps=FORECAST_HORIZON,
+                scaler=price_scaler,
+            )
 
-    weekly_forecast = arimax_fc + lstm_fc
+        elif best_model_name == "Tabular_GBM":
+            gbm_model = joblib.load(artifact_paths["gbr"])
+            exog_columns = meta["exog_columns"]
+            last_x_row = pd.Series(meta["last_X_row"], index=exog_columns, dtype=float)
+            future_exog = _tile_future_exog(last_x_row, FORECAST_HORIZON)
+            future_dates = pd.date_range(
+                start=last_date + pd.Timedelta(days=7),
+                periods=FORECAST_HORIZON,
+                freq="7D",
+            )
+            weekly_forecast = _recursive_tabular_forecast(
+                model=gbm_model,
+                history_prices=df[PRICE_COL].astype(float).to_numpy(),
+                future_dates=future_dates,
+                future_exog=future_exog,
+                first_date=first_date,
+                feature_columns=meta["tabular_feature_columns"],
+            )
 
-    # Interpolate to daily
-    weekly_dates = pd.date_range(start=last_date + pd.Timedelta(weeks=1),
-                                  periods=FORECAST_HORIZON, freq="W")
-    weekly_series = pd.Series(weekly_forecast, index=weekly_dates)
-    daily_dates = pd.date_range(start=last_date + pd.Timedelta(days=1),
-                                 periods=FORECAST_DAYS, freq="D")
-    daily_forecast = weekly_series.reindex(weekly_series.index.union(daily_dates)).interpolate(method="time")
-    daily_forecast = daily_forecast.reindex(daily_dates).ffill().bfill().values
+        else:
+            raise ValueError(f"Unsupported best_model_name: {best_model_name}")
 
-    return {
-        "forecast":    daily_forecast,
-        "dates":       daily_dates,
-        "metrics":     metrics,
-        "all_metrics": all_metrics,
-        "last_date":   last_date,
+    except Exception:
+        LOGGER.exception("Inference failed for saved production model %s; retraining", best_model_name)
+        result = train_hybrid(df=df, crop_name=crop_name)
+        _generate_outputs(crop_name, result, df)
+        return result
+
+    daily_dates, daily_forecast = _interpolate_weekly_to_daily(
+        last_date=last_date,
+        last_actual=last_actual,
+        weekly_forecast=weekly_forecast,
+    )
+
+    result = {
+        "best_model_name": best_model_name,
+        "forecast": daily_forecast,
+        "dates": daily_dates,
+        "weekly_forecast": weekly_forecast,
+        "weekly_dates": pd.date_range(start=last_date + pd.Timedelta(days=7), periods=FORECAST_HORIZON, freq="7D"),
+        "metrics": meta["metrics"],
+        "all_metrics": meta["all_metrics"],
+        "rolling_origin_metrics": meta.get("rolling_origin_metrics", {}),
+        "last_date": last_date,
+        "test_actuals": np.asarray([], dtype=float),
+        "test_predicted": np.asarray([], dtype=float),
+        "test_dates": pd.to_datetime([]),
+        "all_test_predictions": {},
+        "comparison": compare_models(meta["all_metrics"]),
     }
 
+    evaluation_path = os.path.join(OUTPUTS_DIR, f"{crop_name}_evaluation_report.json")
+    if os.path.exists(evaluation_path):
+        try:
+            with open(evaluation_path, "r", encoding="utf-8") as file_obj:
+                report = json.load(file_obj)
+            result["test_actuals"] = np.asarray(report.get("test_actuals", []), dtype=float)
+            result["test_predicted"] = np.asarray(
+                report.get("test_predictions", {}).get(best_model_name, []),
+                dtype=float,
+            )
+            result["test_dates"] = pd.to_datetime(report.get("test_dates", []))
+            result["all_test_predictions"] = {
+                model_name: np.asarray(values, dtype=float)
+                for model_name, values in report.get("test_predictions", {}).items()
+            }
+        except Exception:
+            LOGGER.warning("Failed to read evaluation report at %s", evaluation_path, exc_info=True)
 
-def _generate_outputs(crop_name: str, result: dict, aligned_df: pd.DataFrame):
-    """Generate all CSV and plot outputs after training."""
+    _generate_outputs(crop_name, result, df)
+    return result
+
+
+def _generate_outputs(crop_name, result, df):
     try:
-        # Test-set outputs
-        if "test_actuals" in result and "test_predicted" in result:
-            test_act = result["test_actuals"]
-            test_pred = result["test_predicted"]
-            test_dates = result.get("test_dates", range(len(test_act)))
+        comparison_df = result.get("comparison")
+        if comparison_df is None or comparison_df.empty:
+            comparison_df = compare_models(result.get("all_metrics", {}))
 
-            save_predictions_csv(crop_name, test_act, test_pred, test_dates)
-            plot_actual_vs_predicted(crop_name, test_act, test_pred, test_dates)
-            plot_residuals(crop_name, test_act, test_pred, test_dates)
+        if len(result.get("test_dates", [])) and len(result.get("test_actuals", [])):
+            save_predictions_csv(
+                crop_name=crop_name,
+                dates=result["test_dates"],
+                actual=result["test_actuals"],
+                predicted=result["test_predicted"],
+                all_predictions=result.get("all_test_predictions"),
+            )
+            plot_actual_vs_predicted(
+                crop_name=crop_name,
+                dates=result["test_dates"],
+                actual=result["test_actuals"],
+                predicted=result["test_predicted"],
+            )
+            plot_residuals(
+                crop_name=crop_name,
+                dates=result["test_dates"],
+                actual=result["test_actuals"],
+                predicted=result["test_predicted"],
+            )
+            if result.get("all_test_predictions"):
+                plot_all_model_comparison(
+                    crop_name=crop_name,
+                    dates=result["test_dates"],
+                    actual=result["test_actuals"],
+                    all_predictions=result["all_test_predictions"],
+                )
 
-        # Forecast outputs
-        save_forecast_csv(crop_name, result["forecast"], result["dates"])
-        plot_forecast(crop_name, result["forecast"], result["dates"])
+        save_forecast_csv(crop_name=crop_name, dates=result["dates"], forecast=result["forecast"])
+        if comparison_df is not None and not comparison_df.empty:
+            save_model_comparison_csv(crop_name=crop_name, comparison_df=comparison_df)
+            plot_model_metrics_comparison(crop_name=crop_name, comparison_df=comparison_df)
 
-        # Feature correlations
-        plot_feature_correlations(crop_name, aligned_df)
-
-        # Model comparison
-        if "all_metrics" in result:
-            save_model_comparison_csv(crop_name, result["all_metrics"])
-            plot_model_metrics_bar(crop_name, result["all_metrics"])
-
-            # All-models test prediction plot
-            if "test_actuals" in result:
-                from evaluation import save_evaluation_report
-                import json
-                eval_path = os.path.join("outputs", "metrics", f"{crop_name}_evaluation.json")
-                if os.path.exists(eval_path):
-                    with open(eval_path) as f:
-                        eval_data = json.load(f)
-                    test_preds = eval_data.get("test_predictions", {})
-                    if test_preds:
-                        pred_arrays = {}
-                        for k, v in test_preds.items():
-                            arr = np.array(v)
-                            if len(arr) == len(result["test_actuals"]):
-                                pred_arrays[k] = arr
-                        if pred_arrays:
-                            plot_all_models(crop_name, result["test_actuals"],
-                                          pred_arrays, result["test_dates"])
-
-    except Exception as e:
-        logger.warning("[%s] Output generation error (non-fatal): %s", crop_name, e)
+        history_slice = df.tail(min(26, len(df)))
+        plot_forecast(
+            crop_name=crop_name,
+            history_dates=history_slice[DATE_COL],
+            history_values=history_slice[PRICE_COL],
+            forecast_dates=result["dates"],
+            forecast_values=result["forecast"],
+        )
+        plot_feature_correlations(crop_name=crop_name, df=df)
+    except Exception:
+        LOGGER.warning("Output generation failed for %s", crop_name, exc_info=True)

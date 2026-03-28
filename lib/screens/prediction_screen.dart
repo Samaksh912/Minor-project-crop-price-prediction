@@ -56,11 +56,10 @@ class _PredictionScreenState extends State<PredictionScreen> {
                 children: [
                   const CircularProgressIndicator(),
                   const SizedBox(height: 20),
-                  Text('Running AI model for ${widget.crop.displayName}…',
-                      style: const TextStyle(fontSize: 15)),
-                  const SizedBox(height: 8),
-                  const Text('First run may take 1–5 minutes.',
-                      style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  const Text(
+                    'Fetching output from backend...',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                  ),
                 ],
               ),
             );

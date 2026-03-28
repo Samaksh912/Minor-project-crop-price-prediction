@@ -1,59 +1,50 @@
-"""
-output_generator.py
--------------------
-Generate output CSV files: prediction CSVs (actual vs predicted)
-and 90-day forecast CSVs.
-"""
+from __future__ import annotations
 
-import os
 import logging
+import os
 
 import numpy as np
 import pandas as pd
 
 from config import OUTPUTS_DIR
 
-logger = logging.getLogger(__name__)
+
+LOGGER = logging.getLogger(__name__)
 
 
-def save_predictions_csv(crop_name: str, actual: np.ndarray,
-                          predicted: np.ndarray, dates) -> str:
-    """Save actual vs predicted values (test set) to CSV."""
-    df = pd.DataFrame({
-        "date":      dates,
-        "actual":    np.round(actual, 2),
-        "predicted": np.round(predicted, 2),
-        "error":     np.round(actual - predicted, 2),
-        "abs_error": np.round(np.abs(actual - predicted), 2),
-        "pct_error": np.round(
-            np.abs((actual - predicted) / np.where(actual != 0, actual, 1)) * 100, 2
-        ),
-    })
-    path = os.path.join(OUTPUTS_DIR, f"{crop_name}_test_predictions.csv")
-    df.to_csv(path, index=False)
-    logger.info("Test predictions CSV → %s", path)
-    return path
+def save_predictions_csv(crop_name, dates, actual, predicted, all_predictions=None):
+    output_path = os.path.join(OUTPUTS_DIR, f"{crop_name}_test_predictions.csv")
+    frame = pd.DataFrame(
+        {
+            "date": pd.to_datetime(dates),
+            "actual": np.asarray(actual, dtype=float),
+            "predicted": np.asarray(predicted, dtype=float),
+        }
+    )
+    if all_predictions:
+        for model_name, values in all_predictions.items():
+            frame[f"pred_{model_name}"] = np.asarray(values, dtype=float)
+    frame.to_csv(output_path, index=False)
+    LOGGER.info("Saved test predictions to %s", output_path)
+    return output_path
 
 
-def save_forecast_csv(crop_name: str, forecast: np.ndarray, dates) -> str:
-    """Save 90-day forecast to CSV."""
-    df = pd.DataFrame({
-        "date":                 dates,
-        "predicted_modal_price": np.round(forecast, 2),
-    })
-    path = os.path.join(OUTPUTS_DIR, f"{crop_name}_90day_forecast.csv")
-    df.to_csv(path, index=False)
-    logger.info("Forecast CSV → %s", path)
-    return path
+def save_forecast_csv(crop_name, dates, forecast):
+    output_path = os.path.join(OUTPUTS_DIR, f"{crop_name}_forecast.csv")
+    frame = pd.DataFrame(
+        {
+            "date": pd.to_datetime(dates),
+            "forecast": np.asarray(forecast, dtype=float),
+        }
+    )
+    frame.to_csv(output_path, index=False)
+    LOGGER.info("Saved forecast to %s", output_path)
+    return output_path
 
 
-def save_model_comparison_csv(crop_name: str, all_metrics: dict) -> str:
-    """Save model comparison metrics to CSV."""
-    rows = []
-    for model_name, metrics in all_metrics.items():
-        rows.append({"model": model_name, **metrics})
-    df = pd.DataFrame(rows).sort_values("rmse")
-    path = os.path.join(OUTPUTS_DIR, f"{crop_name}_model_comparison.csv")
-    df.to_csv(path, index=False)
-    logger.info("Model comparison CSV → %s", path)
-    return path
+def save_model_comparison_csv(crop_name, comparison_df):
+    output_path = os.path.join(OUTPUTS_DIR, f"{crop_name}_model_comparison.csv")
+    comparison_df.to_csv(output_path, index=False)
+    LOGGER.info("Saved model comparison to %s", output_path)
+    return output_path
+

@@ -1,0 +1,265 @@
+{
+  "dataset": "/home/arnavbansal/Samaksh_m/backend/data/coimbatore_maize_model_daily_v3.csv",
+  "tabular_model": "GradientBoostingRegressor",
+  "tabular_model_reason": "XGBoost is not available in the current environment, so the experiment uses the sklearn fallback without changing the backend dependency stack.",
+  "experiment_a": {
+    "name": "experiment_a",
+    "rows": 292,
+    "date_start": "2020-04-05",
+    "date_end": "2025-11-02",
+    "train_size": 233,
+    "test_size": 59,
+    "exog_columns": [
+      "tavg",
+      "tmin",
+      "tmax",
+      "prcp",
+      "wdir",
+      "wspd",
+      "pres",
+      "temp_anomaly",
+      "rain_anomaly"
+    ],
+    "comparison_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_experiment_a_holdout_model_comparison.csv",
+    "predictions_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_experiment_a_holdout_predictions.csv",
+    "holdout_results": {
+      "ARIMA": {
+        "metrics": {
+          "rmse": 232.56838705585818,
+          "mae": 193.67436257799892,
+          "mape_pct": 6.385396034658021
+        },
+        "notes": []
+      },
+      "ARIMAX": {
+        "metrics": {
+          "rmse": 254.32093294384603,
+          "mae": 209.2977903270372,
+          "mape_pct": 6.897668502047415
+        },
+        "notes": [
+          "SARIMAX optimizer reported non-convergence on holdout fit."
+        ]
+      },
+      "Tabular": {
+        "metrics": {
+          "rmse": 261.35746200431413,
+          "mae": 222.22566735341556,
+          "mape_pct": 7.3434086149173075
+        },
+        "notes": [
+          "Tabular model: GradientBoostingRegressor"
+        ]
+      },
+      "Hybrid_ARIMAX_LSTM": {
+        "metrics": {
+          "rmse": 218.52645183773163,
+          "mae": 171.9896551232265,
+          "mape_pct": 5.6469209963542575
+        },
+        "notes": [
+          "ARIMAX base optimizer reported non-convergence on holdout fit."
+        ]
+      }
+    },
+    "naive_last_value_baseline": {
+      "rmse": 237.73656500083328,
+      "mae": 200.07605019854742,
+      "mape_pct": 6.602531520801766
+    },
+    "winner": "Hybrid_ARIMAX_LSTM",
+    "winner_metrics": {
+      "rmse": 218.52645183773163,
+      "mae": 171.9896551232265,
+      "mape_pct": 5.6469209963542575
+    },
+    "rolling": {
+      "splits_evaluated": 3,
+      "comparison_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_experiment_a_rolling_model_comparison.csv",
+      "results": {
+        "ARIMA": {
+          "metrics": {
+            "rmse": 141.80414797054627,
+            "mae": 129.85318544733894,
+            "mape_pct": 4.327704615158168
+          },
+          "notes": []
+        },
+        "ARIMAX": {
+          "metrics": {
+            "rmse": 160.06077359874314,
+            "mae": 150.52466665589483,
+            "mape_pct": 5.039828008412936
+          },
+          "notes": [
+            "SARIMAX optimizer reported non-convergence on holdout fit."
+          ]
+        },
+        "Tabular": {
+          "metrics": {
+            "rmse": 189.58578330277848,
+            "mae": 155.68143487000725,
+            "mape_pct": 5.1146716933630065
+          },
+          "notes": [
+            "Tabular model: GradientBoostingRegressor"
+          ]
+        },
+        "Hybrid_ARIMAX_LSTM": {
+          "metrics": {
+            "rmse": 169.47024456880587,
+            "mae": 159.41462113441867,
+            "mape_pct": 5.348215011341406
+          },
+          "notes": [
+            "ARIMAX base optimizer reported non-convergence on holdout fit."
+          ]
+        }
+      },
+      "winner": "ARIMA",
+      "winner_metrics": {
+        "rmse": 141.80414797054627,
+        "mae": 129.85318544733894,
+        "mape_pct": 4.327704615158168
+      }
+    }
+  },
+  "experiment_b": {
+    "name": "experiment_b",
+    "rows": 127,
+    "date_start": "2023-06-04",
+    "date_end": "2025-11-02",
+    "train_size": 101,
+    "test_size": 26,
+    "exog_columns": [
+      "tavg",
+      "tmin",
+      "tmax",
+      "prcp",
+      "wdir",
+      "wspd",
+      "pres",
+      "temp_anomaly",
+      "rain_anomaly",
+      "msp_applicable",
+      "msp_value_per_quintal",
+      "govt_procurement_active",
+      "pmfby_insurance_active",
+      "state_scheme_active",
+      "harvest_season_active",
+      "dir_downward",
+      "dir_neutral",
+      "dir_upward"
+    ],
+    "comparison_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_experiment_b_holdout_model_comparison.csv",
+    "predictions_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_experiment_b_holdout_predictions.csv",
+    "holdout_results": {
+      "ARIMA": {
+        "metrics": {
+          "rmse": 113.41923980014452,
+          "mae": 103.13279352745744,
+          "mape_pct": 3.4908986528546877
+        },
+        "notes": []
+      },
+      "ARIMAX": {
+        "metrics": {
+          "rmse": 129.07258014432352,
+          "mae": 108.61852401813479,
+          "mape_pct": 3.7357483121958404
+        },
+        "notes": [
+          "SARIMAX optimizer reported non-convergence on holdout fit."
+        ]
+      },
+      "Tabular": {
+        "metrics": {
+          "rmse": 165.58434777474392,
+          "mae": 151.86701603015152,
+          "mape_pct": 5.117258680239509
+        },
+        "notes": [
+          "Tabular model: GradientBoostingRegressor"
+        ]
+      },
+      "Hybrid_ARIMAX_LSTM": {
+        "metrics": {
+          "rmse": 132.29436779702817,
+          "mae": 122.9361904099241,
+          "mape_pct": 4.167785308037023
+        },
+        "notes": [
+          "ARIMAX base optimizer reported non-convergence on holdout fit."
+        ]
+      }
+    },
+    "naive_last_value_baseline": {
+      "rmse": 113.08984779597883,
+      "mae": 102.38904150274726,
+      "mape_pct": 3.4712386800538493
+    },
+    "winner": "ARIMA",
+    "winner_metrics": {
+      "rmse": 113.41923980014452,
+      "mae": 103.13279352745744,
+      "mape_pct": 3.4908986528546877
+    },
+    "rolling": {
+      "splits_evaluated": 3,
+      "comparison_path": "/home/arnavbansal/Samaksh_m/backend/outputs/maize_v3_experiment_b_rolling_model_comparison.csv",
+      "results": {
+        "ARIMA": {
+          "metrics": {
+            "rmse": 143.32260822019177,
+            "mae": 129.2593288241702,
+            "mape_pct": 4.301846723658011
+          },
+          "notes": []
+        },
+        "ARIMAX": {
+          "metrics": {
+            "rmse": 205.3763459093185,
+            "mae": 185.18433702615306,
+            "mape_pct": 6.211692593319828
+          },
+          "notes": [
+            "SARIMAX optimizer reported non-convergence on holdout fit."
+          ]
+        },
+        "Tabular": {
+          "metrics": {
+            "rmse": 194.4629174405823,
+            "mae": 168.16438899057457,
+            "mape_pct": 5.576168268752802
+          },
+          "notes": [
+            "Tabular model: GradientBoostingRegressor"
+          ]
+        },
+        "Hybrid_ARIMAX_LSTM": {
+          "metrics": {
+            "rmse": 210.42012762358618,
+            "mae": 186.9718872505949,
+            "mape_pct": 6.26648717432992
+          },
+          "notes": [
+            "ARIMAX base optimizer reported non-convergence on holdout fit."
+          ]
+        }
+      },
+      "winner": "ARIMA",
+      "winner_metrics": {
+        "rmse": 143.32260822019177,
+        "mae": 129.2593288241702,
+        "mape_pct": 4.301846723658011
+      }
+    }
+  },
+  "recommendation": {
+    "better_holdout_regime": "experiment_b",
+    "better_rolling_regime": "experiment_a",
+    "product_demo": "experiment_b",
+    "research_paper": "experiment_a",
+    "evidence": "Experiment A measures whether longer history plus weather-only exogenous structure is enough. Experiment B measures whether policy/MSP features justify discarding the older pre-policy years. The recommendation prefers recent holdout performance for the product/demo when that gap is materially larger, but still values longer-history rolling stability for the research direction."
+  }
+}
