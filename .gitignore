@@ -43,3 +43,21 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Python/Backend related
+backend/.venv/
+backend/__pycache__/
+backend/.mplconfig/
+backend/outputs/
+backend/plots/
+backend/models/*.keras
+backend/models/*.pkl
+
+# Analysis and logs
+*.txt
+!requirements.txt
+*.ipynb
+!README.md
+/extracted_data/
+/bestcropprice_outputs.zip
+/curl
