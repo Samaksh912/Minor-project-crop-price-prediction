@@ -235,3 +235,4 @@ def _generate_outputs(crop_name, result, df):
         plot_feature_correlations(crop_name=crop_name, df=df)
     except Exception:
         LOGGER.warning("Output generation failed for %s", crop_name, exc_info=True)
+

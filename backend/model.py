@@ -794,3 +794,4 @@ def _cleanup_stale_artifacts(crop_name, keep_keys):
         if os.path.exists(path):
             os.remove(path)
             LOGGER.info("Removed stale artifact %s", path)
+

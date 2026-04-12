@@ -1,8 +1,19 @@
+    if crop != CROP_NAME:
+        return _error_response("Unsupported crop", 400, {"allowed": [CROP_NAME]})
+        df = load_data()
+    crop = payload.get("crop", CROP_NAME)
+    if crop != CROP_NAME:
+        return _error_response("Unsupported crop", 400, {"allowed": [CROP_NAME]})
+        df = load_data()
+    crop = payload.get("crop", CROP_NAME)
+    if crop != CROP_NAME:
+        return _error_response("Unsupported crop", 400, {"allowed": [CROP_NAME]})
+    return jsonify({"status": "ok", "crops": [CROP_NAME]})
 from __future__ import annotations
 
 import json
 import logging
-import os
+from config import CROP_NAME, OUTPUTS_DIR, SUPPORTED_CROPS, normalize_crop_name
 
 os.environ.setdefault(
     "MPLCONFIGDIR",
@@ -38,18 +49,18 @@ def _error_response(message, status_code=400, details=None):
 @app.get("/api/health")
 def health():
     return jsonify(
-        {
+    return jsonify({"status": "ok", "crops": SUPPORTED_CROPS})
             "status": "ok",
             "service": "BestCropPrice",
             "crop": CROP_NAME,
             "model_ready": model_exists(CROP_NAME),
         }
-    )
-
-
+    crop = normalize_crop_name(payload.get("crop", CROP_NAME))
+    if crop not in SUPPORTED_CROPS:
+        return _error_response("Unsupported crop", 400, {"allowed": SUPPORTED_CROPS})
 @app.get("/api/crops")
 def crops():
-    return jsonify({"status": "ok", "crops": [CROP_NAME]})
+        df = load_data(crop)
 
 
 @app.post("/api/predict")
@@ -63,6 +74,9 @@ def predict_endpoint():
         df = load_data()
         result = predict(crop_name=crop, df=df, force_retrain=bool(payload.get("force_retrain", False)))
     except Exception as exc:
+            "spike_flags": [int(item) for item in result.get("spike_flags", [])],
+            "spike_scores": [float(item) for item in result.get("spike_scores", [])],
+            "spike_rule": result.get("spike_rule", {}),
         LOGGER.exception("Prediction failed")
         return _error_response("Prediction failed", 500, {"error": str(exc)})
 
@@ -70,12 +84,12 @@ def predict_endpoint():
         {
             "status": "ok",
             "crop": crop,
-            "best_model_name": result["best_model_name"],
-            "metrics": result["metrics"],
-            "forecast_dates": [item.strftime("%Y-%m-%d") for item in result["dates"]],
+    crop = normalize_crop_name(payload.get("crop", CROP_NAME))
+    if crop not in SUPPORTED_CROPS:
+        return _error_response("Unsupported crop", 400, {"allowed": SUPPORTED_CROPS})
             "forecast": [float(item) for item in result["forecast"]],
         }
-    )
+        df = load_data(crop)
 
 
 @app.post("/api/train")
@@ -94,8 +108,9 @@ def train_endpoint():
 
     return jsonify(
         {
-            "status": "ok",
-            "crop": crop,
+    crop = normalize_crop_name(crop)
+    if crop not in SUPPORTED_CROPS:
+        return _error_response("Unsupported crop", 400, {"allowed": SUPPORTED_CROPS})
             "best_model_name": result["best_model_name"],
             "metrics": result["metrics"],
             "all_metrics": result["all_metrics"],

@@ -48,8 +48,6 @@ app.*.map.json
 backend/.venv/
 backend/__pycache__/
 backend/.mplconfig/
-backend/outputs/
-backend/plots/
 backend/models/*.keras
 backend/models/*.pkl
 

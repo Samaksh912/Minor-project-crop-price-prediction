@@ -1,0 +1,334 @@
+{
+  "generated_at": "2026-04-11 13:46:34",
+  "steps": {
+    "msp_fill": [
+      {
+        "file": "coimbatore_maize_model_daily.csv",
+        "nulls_before": 0,
+        "nulls_after": 0
+      },
+      {
+        "file": "bananagreen_model_daily.csv",
+        "nulls_before": 0,
+        "nulls_after": 0
+      },
+      {
+        "file": "beans_model_daily.csv",
+        "nulls_before": 0,
+        "nulls_after": 0
+      },
+      {
+        "file": "mango_model_daily.csv",
+        "nulls_before": 0,
+        "nulls_after": 0
+      },
+      {
+        "file": "apple_model_daily.csv",
+        "nulls_before": 475,
+        "nulls_after": 0
+      },
+      {
+        "file": "beetroot_model_daily.csv",
+        "nulls_before": 572,
+        "nulls_after": 0
+      },
+      {
+        "file": "lemon_model_daily.csv",
+        "nulls_before": 838,
+        "nulls_after": 0
+      },
+      {
+        "file": "ladies_finger_model_daily.csv",
+        "nulls_before": 838,
+        "nulls_after": 0
+      }
+    ]
+  },
+  "cases": [
+    {
+      "crop": "maize",
+      "file": "coimbatore_maize_model_daily.csv",
+      "status": "ok",
+      "elapsed_sec": 58.24,
+      "best_model_before": "ARIMA",
+      "best_model_after": "ARIMA",
+      "metrics_before": {
+        "rmse": 124.84675316503207,
+        "mae": 96.57093167279135,
+        "mape_pct": 3.3429721860790726
+      },
+      "metrics_after": {
+        "rmse": 124.84675316503207,
+        "mae": 96.57093167279135,
+        "mape_pct": 3.3429721860790726
+      },
+      "rmse_delta": 0.0,
+      "mae_delta": 0.0,
+      "mape_delta": 0.0,
+      "hybrid_diagnostics": {
+        "accepted": false,
+        "reason": "fallback_to_arimax_no_rmse_gain",
+        "base_arimax_metrics": {
+          "rmse": 211.94373442142575,
+          "mae": 189.6355594197566,
+          "mape_pct": 6.669975384715905
+        },
+        "hybrid_metrics": {
+          "rmse": 220.03008163849876,
+          "mae": 196.9162383669814,
+          "mape_pct": 6.931243035249446
+        }
+      }
+    },
+    {
+      "crop": "bananagreen",
+      "file": "bananagreen_model_daily.csv",
+      "status": "ok",
+      "elapsed_sec": 103.34,
+      "best_model_before": "Tabular_GBM",
+      "best_model_after": "Tabular_GBM",
+      "metrics_before": {
+        "rmse": 411.4074406587758,
+        "mae": 336.38214249269885,
+        "mape_pct": 9.657739192742339
+      },
+      "metrics_after": {
+        "rmse": 411.4074406587758,
+        "mae": 336.38214249269885,
+        "mape_pct": 9.657739192742339
+      },
+      "rmse_delta": 0.0,
+      "mae_delta": 0.0,
+      "mape_delta": 0.0,
+      "hybrid_diagnostics": {
+        "accepted": false,
+        "reason": "fallback_to_arimax_no_rmse_gain",
+        "base_arimax_metrics": {
+          "rmse": 527.1911028433494,
+          "mae": 439.74011515002553,
+          "mape_pct": 12.585557018861627
+        },
+        "hybrid_metrics": {
+          "rmse": 550.5768832590321,
+          "mae": 463.7418363499917,
+          "mape_pct": 13.25219930060807
+        }
+      }
+    },
+    {
+      "crop": "beans",
+      "file": "beans_model_daily.csv",
+      "status": "ok",
+      "elapsed_sec": 103.58,
+      "best_model_before": "ARIMAX",
+      "best_model_after": "ARIMAX",
+      "metrics_before": {
+        "rmse": 2841.796537323216,
+        "mae": 2188.940862650984,
+        "mape_pct": 27.07752491027266
+      },
+      "metrics_after": {
+        "rmse": 2841.796537323216,
+        "mae": 2188.940862650984,
+        "mape_pct": 27.07752491027266
+      },
+      "rmse_delta": 0.0,
+      "mae_delta": 0.0,
+      "mape_delta": 0.0,
+      "hybrid_diagnostics": {
+        "accepted": false,
+        "reason": "fallback_to_arimax_no_rmse_gain",
+        "base_arimax_metrics": {
+          "rmse": 2841.796537323216,
+          "mae": 2188.940862650984,
+          "mape_pct": 27.07752491027266
+        },
+        "hybrid_metrics": {
+          "rmse": 2840.541858268298,
+          "mae": 2182.235340897102,
+          "mape_pct": 26.93731113541468
+        }
+      }
+    },
+    {
+      "crop": "mango",
+      "file": "mango_model_daily.csv",
+      "status": "ok",
+      "elapsed_sec": 174.94,
+      "best_model_before": "Hybrid_ARIMAX_LSTM",
+      "best_model_after": "Hybrid_ARIMAX_LSTM",
+      "metrics_before": {
+        "rmse": 2219.4614642200922,
+        "mae": 1681.297779039192,
+        "mape_pct": 10.805590237003656
+      },
+      "metrics_after": {
+        "rmse": 2233.3139642627316,
+        "mae": 1692.805531307248,
+        "mape_pct": 10.853929668263397
+      },
+      "rmse_delta": 13.852500042639349,
+      "mae_delta": 11.507752268056038,
+      "mape_delta": 0.04833943125974116,
+      "hybrid_diagnostics": {
+        "accepted": true,
+        "reason": "hybrid_improved_rmse",
+        "base_arimax_metrics": {
+          "rmse": 2408.898128797672,
+          "mae": 1855.6029142494751,
+          "mape_pct": 11.650893472167095
+        },
+        "hybrid_metrics": {
+          "rmse": 2233.3139642627316,
+          "mae": 1692.805531307248,
+          "mape_pct": 10.853929668263397
+        }
+      }
+    },
+    {
+      "crop": "apple",
+      "file": "apple_model_daily.csv",
+      "status": "ok",
+      "elapsed_sec": 91.48,
+      "best_model_before": "Tabular_GBM",
+      "best_model_after": "Standalone_LSTM",
+      "metrics_before": {
+        "rmse": 2563.284443541591,
+        "mae": 2063.732408470414,
+        "mape_pct": 8.747856095213496
+      },
+      "metrics_after": {
+        "rmse": 2524.1442936682392,
+        "mae": 2159.7289699966027,
+        "mape_pct": 9.066164680500458
+      },
+      "rmse_delta": -39.140149873351675,
+      "mae_delta": 95.99656152618854,
+      "mape_delta": 0.31830858528696204,
+      "hybrid_diagnostics": {
+        "accepted": true,
+        "reason": "hybrid_improved_rmse",
+        "base_arimax_metrics": {
+          "rmse": 3411.453427563647,
+          "mae": 3088.9106405877938,
+          "mape_pct": 13.049024909755543
+        },
+        "hybrid_metrics": {
+          "rmse": 3228.1534805708375,
+          "mae": 2911.1681074313965,
+          "mape_pct": 12.291444942715392
+        }
+      }
+    },
+    {
+      "crop": "beetroot",
+      "file": "beetroot_model_daily.csv",
+      "status": "ok",
+      "elapsed_sec": 119.76,
+      "best_model_before": "Tabular_GBM",
+      "best_model_after": "Hybrid_ARIMAX_LSTM",
+      "metrics_before": {
+        "rmse": 1052.967468514149,
+        "mae": 847.7587920738905,
+        "mape_pct": 15.220758323285319
+      },
+      "metrics_after": {
+        "rmse": 1049.1683215195603,
+        "mae": 912.1623180939597,
+        "mape_pct": 15.932324691112248
+      },
+      "rmse_delta": -3.799146994588682,
+      "mae_delta": 64.4035260200692,
+      "mape_delta": 0.7115663678269293,
+      "hybrid_diagnostics": {
+        "accepted": true,
+        "reason": "hybrid_improved_rmse",
+        "base_arimax_metrics": {
+          "rmse": 1068.9752197107368,
+          "mae": 932.2431039135439,
+          "mape_pct": 16.610905078871767
+        },
+        "hybrid_metrics": {
+          "rmse": 1049.1683215195603,
+          "mae": 912.1623180939597,
+          "mape_pct": 15.932324691112248
+        }
+      }
+    },
+    {
+      "crop": "lemon",
+      "file": "lemon_model_daily.csv",
+      "status": "ok",
+      "elapsed_sec": 83.52,
+      "best_model_before": "Tabular_GBM",
+      "best_model_after": "Tabular_GBM",
+      "metrics_before": {
+        "rmse": 1960.576111883724,
+        "mae": 1663.88814600229,
+        "mape_pct": 18.5190284863539
+      },
+      "metrics_after": {
+        "rmse": 1960.576111883724,
+        "mae": 1663.88814600229,
+        "mape_pct": 18.5190284863539
+      },
+      "rmse_delta": 0.0,
+      "mae_delta": 0.0,
+      "mape_delta": 0.0,
+      "hybrid_diagnostics": {
+        "accepted": false,
+        "reason": "fallback_to_arimax_no_rmse_gain",
+        "base_arimax_metrics": {
+          "rmse": 2801.959368240782,
+          "mae": 2477.5149304475067,
+          "mape_pct": 24.008631326852935
+        },
+        "hybrid_metrics": {
+          "rmse": 2789.119212618821,
+          "mae": 2484.5648945391813,
+          "mape_pct": 24.332381869522816
+        }
+      }
+    },
+    {
+      "crop": "ladies_finger",
+      "file": "ladies_finger_model_daily.csv",
+      "status": "ok",
+      "elapsed_sec": 86.94,
+      "best_model_before": "ARIMA",
+      "best_model_after": "ARIMAX",
+      "metrics_before": {
+        "rmse": 906.781518361147,
+        "mae": 769.0599736254585,
+        "mape_pct": 22.692470587052075
+      },
+      "metrics_after": {
+        "rmse": 894.8077766301191,
+        "mae": 756.9937120423564,
+        "mape_pct": 22.601350628073856
+      },
+      "rmse_delta": -11.973741731027985,
+      "mae_delta": -12.066261583102118,
+      "mape_delta": -0.09111995897821856,
+      "hybrid_diagnostics": {
+        "accepted": false,
+        "reason": "fallback_to_arimax_no_rmse_gain",
+        "base_arimax_metrics": {
+          "rmse": 894.8077766301191,
+          "mae": 756.9937120423564,
+          "mape_pct": 22.601350628073856
+        },
+        "hybrid_metrics": {
+          "rmse": 891.9807440627325,
+          "mae": 755.3012891303338,
+          "mape_pct": 22.48437984646913
+        }
+      }
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "ok": 8,
+    "failed": 0
+  }
+}

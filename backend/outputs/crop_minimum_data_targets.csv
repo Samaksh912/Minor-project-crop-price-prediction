@@ -1,0 +1,7 @@
+crop,file,date_start,date_end,weekly_total,weekly_observed,usable_after_lag13,train_rows,test_rows,lstm_sequences,min_required_usable,robust_required_usable,gap_to_min,gap_to_robust,verdict
+apple,apple.csv,2020-08-01,2025-05-04,249,96,236,188,48,184,66,113,0,0,READY
+banana-green,Bananagreen.csv,2024-06-18,2025-05-04,46,30,33,26,7,22,66,113,33,80,NOT_READY
+beans,beans.csv,2024-06-18,2025-05-04,46,30,33,26,7,22,66,113,33,80,NOT_READY
+beetroot,beetroot.csv,2020-07-16,2025-05-04,251,108,238,190,48,186,66,113,0,0,READY
+maize,maize.csv,2023-03-15,2025-10-30,138,128,125,100,25,96,66,113,0,0,READY
+mango,mango.csv,2024-06-18,2025-05-04,46,27,33,26,7,22,66,113,33,80,NOT_READY

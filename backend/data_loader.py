@@ -142,3 +142,4 @@ def get_exog_cols(df: pd.DataFrame) -> list[str]:
             continue
         allowed.append(col)
     return allowed
+

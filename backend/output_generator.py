@@ -29,7 +29,7 @@ def save_predictions_csv(crop_name, dates, actual, predicted, all_predictions=No
     return output_path
 
 
-def save_forecast_csv(crop_name, dates, forecast):
+def save_forecast_csv(crop_name, dates, forecast, spike_flags=None, spike_scores=None):
     output_path = os.path.join(OUTPUTS_DIR, f"{crop_name}_forecast.csv")
     frame = pd.DataFrame(
         {
@@ -37,6 +37,10 @@ def save_forecast_csv(crop_name, dates, forecast):
             "forecast": np.asarray(forecast, dtype=float),
         }
     )
+    if spike_flags is not None:
+        frame["spike_flag"] = np.asarray(spike_flags, dtype=int)
+    if spike_scores is not None:
+        frame["spike_score"] = np.asarray(spike_scores, dtype=float)
     frame.to_csv(output_path, index=False)
     LOGGER.info("Saved forecast to %s", output_path)
     return output_path

@@ -1,0 +1,186 @@
+{
+  "generated_at": "2026-04-11 13:16:16",
+  "cases": [
+    {
+      "crop": "maize",
+      "file": "coimbatore_maize_model_daily.csv",
+      "rows": 416,
+      "columns": 21,
+      "missing_required_cols": [],
+      "msp_nulls": 0,
+      "date_min": "2023-03-15",
+      "date_max": "2024-12-31",
+      "date_unique": 416,
+      "date_duplicates": 0,
+      "modal_outside_range": 0,
+      "elapsed_sec": 6.98,
+      "status": "ok",
+      "best_model_name": "ARIMA",
+      "forecast_len": 90,
+      "metrics": {
+        "rmse": 124.84675316503207,
+        "mae": 96.57093167279135,
+        "mape_pct": 3.3429721860790726
+      }
+    },
+    {
+      "crop": "bananagreen",
+      "file": "bananagreen_model_daily.csv",
+      "rows": 818,
+      "columns": 21,
+      "missing_required_cols": [],
+      "msp_nulls": 0,
+      "date_min": "2022-01-03",
+      "date_max": "2025-05-04",
+      "date_unique": 818,
+      "date_duplicates": 0,
+      "modal_outside_range": 0,
+      "elapsed_sec": 4.72,
+      "status": "ok",
+      "best_model_name": "Tabular_GBM",
+      "forecast_len": 90,
+      "metrics": {
+        "rmse": 411.4074406587758,
+        "mae": 336.38214249269885,
+        "mape_pct": 9.657739192742339
+      }
+    },
+    {
+      "crop": "beans",
+      "file": "beans_model_daily.csv",
+      "rows": 832,
+      "columns": 21,
+      "missing_required_cols": [],
+      "msp_nulls": 0,
+      "date_min": "2022-01-03",
+      "date_max": "2025-05-04",
+      "date_unique": 832,
+      "date_duplicates": 0,
+      "modal_outside_range": 0,
+      "elapsed_sec": 6.64,
+      "status": "ok",
+      "best_model_name": "Hybrid_ARIMAX_LSTM",
+      "forecast_len": 90,
+      "metrics": {
+        "rmse": 2838.680872885125,
+        "mae": 2170.8647723791223,
+        "mape_pct": 26.6993299489245
+      }
+    },
+    {
+      "crop": "mango",
+      "file": "mango_model_daily.csv",
+      "rows": 578,
+      "columns": 21,
+      "missing_required_cols": [],
+      "msp_nulls": 0,
+      "date_min": "2021-04-01",
+      "date_max": "2025-05-04",
+      "date_unique": 578,
+      "date_duplicates": 0,
+      "modal_outside_range": 0,
+      "elapsed_sec": 5.78,
+      "status": "ok",
+      "best_model_name": "Hybrid_ARIMAX_LSTM",
+      "forecast_len": 90,
+      "metrics": {
+        "rmse": 2219.4614642200922,
+        "mae": 1681.297779039192,
+        "mape_pct": 10.805590237003656
+      }
+    },
+    {
+      "crop": "apple",
+      "file": "apple_model_daily.csv",
+      "rows": 475,
+      "columns": 21,
+      "missing_required_cols": [],
+      "msp_nulls": 475,
+      "date_min": "2020-08-01",
+      "date_max": "2025-05-04",
+      "date_unique": 475,
+      "date_duplicates": 0,
+      "modal_outside_range": 0,
+      "elapsed_sec": 4.16,
+      "status": "ok",
+      "best_model_name": "Tabular_GBM",
+      "forecast_len": 90,
+      "metrics": {
+        "rmse": 2563.284443541591,
+        "mae": 2063.732408470414,
+        "mape_pct": 8.747856095213496
+      }
+    },
+    {
+      "crop": "beetroot",
+      "file": "beetroot_model_daily.csv",
+      "rows": 572,
+      "columns": 21,
+      "missing_required_cols": [],
+      "msp_nulls": 572,
+      "date_min": "2020-07-16",
+      "date_max": "2025-05-04",
+      "date_unique": 572,
+      "date_duplicates": 0,
+      "modal_outside_range": 0,
+      "elapsed_sec": 4.78,
+      "status": "ok",
+      "best_model_name": "Tabular_GBM",
+      "forecast_len": 90,
+      "metrics": {
+        "rmse": 1052.967468514149,
+        "mae": 847.7587920738905,
+        "mape_pct": 15.220758323285319
+      }
+    },
+    {
+      "crop": "lemon",
+      "file": "lemon_model_daily.csv",
+      "rows": 838,
+      "columns": 21,
+      "missing_required_cols": [],
+      "msp_nulls": 838,
+      "date_min": "2022-01-03",
+      "date_max": "2025-05-04",
+      "date_unique": 838,
+      "date_duplicates": 0,
+      "modal_outside_range": 0,
+      "elapsed_sec": 5.26,
+      "status": "ok",
+      "best_model_name": "Tabular_GBM",
+      "forecast_len": 90,
+      "metrics": {
+        "rmse": 1960.576111883724,
+        "mae": 1663.88814600229,
+        "mape_pct": 18.5190284863539
+      }
+    },
+    {
+      "crop": "ladies_finger",
+      "file": "ladies_finger_model_daily.csv",
+      "rows": 838,
+      "columns": 21,
+      "missing_required_cols": [],
+      "msp_nulls": 838,
+      "date_min": "2022-01-03",
+      "date_max": "2025-05-04",
+      "date_unique": 838,
+      "date_duplicates": 0,
+      "modal_outside_range": 0,
+      "elapsed_sec": 45.29,
+      "status": "ok",
+      "best_model_name": "ARIMA",
+      "forecast_len": 90,
+      "metrics": {
+        "rmse": 906.781518361147,
+        "mae": 769.0599736254585,
+        "mape_pct": 22.692470587052075
+      }
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "ok": 8,
+    "failed_or_missing": 0
+  }
+}
