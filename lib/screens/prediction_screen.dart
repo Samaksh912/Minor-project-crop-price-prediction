@@ -387,11 +387,6 @@ class _HeaderCard extends StatelessWidget {
                           fontWeight: FontWeight.w800,
                           fontSize: 16),
                     ),
-                    Text('Confidence',
-                        style: TextStyle(
-                            fontSize: 10,
-                            color: response.accuracyColor.withOpacity(0.8),
-                            fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),

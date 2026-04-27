@@ -65,17 +65,6 @@ class AppDrawer extends StatelessWidget {
               _showHowItWorksDialog(context);
             },
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings - Coming Soon')),
-              );
-            },
-          ),
         ],
       ),
     );
@@ -110,13 +99,6 @@ class AppDrawer extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Prediction Accuracy:\n',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text('• Next 3 weeks: >90% accuracy\n'),
-              Text('• Next 6 weeks: ~60% accuracy\n'),
-              Text('• Next 3 months: <30% accuracy\n\n'),
               Text(
                 'How to Use:\n',
                 style: TextStyle(fontWeight: FontWeight.bold),
