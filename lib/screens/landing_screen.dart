@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
 
 // --- CONSTANTS & THEME ---
 const Color grassGreen = Color(0xFF4CAF50);
@@ -425,7 +426,11 @@ class HeroSection extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 60),
                                       MagneticHoverWidget(
-                                          child: HeroCtaButton(onTap: () {})),
+                                          child: HeroCtaButton(
+                                              onTap: () => Navigator.of(context)
+                                                  .push(MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          const HomeScreen())))),
                                     ],
                                   ),
                                 ),
@@ -1367,7 +1372,9 @@ class _FinalCtaSectionState extends State<FinalCtaSection>
                         ],
                       ),
                       child: ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const HomeScreen()),
+                        ),
                         icon: const Icon(Icons.eco,
                             color: Colors.white, size: 24),
                         label: const Text('Start Predicting Free',
