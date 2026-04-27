@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
+import 'screens/landing_screen.dart';
 import 'providers/crop_provider.dart';
 
 void main() {
@@ -28,7 +30,7 @@ class MyApp extends StatelessWidget {
             elevation: 0,
           ),
         ),
-        home: const HomeScreen(),
+        home: kIsWeb ? const LandingScreen() : const HomeScreen(),
       ),
     );
   }

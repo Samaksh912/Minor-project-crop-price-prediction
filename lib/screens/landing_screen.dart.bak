@@ -1,0 +1,1137 @@
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+
+// --- CONSTANTS & THEME ---
+const Color grassGreen = Color(0xFF4CAF50);
+const Color lightGreen = Color(0xFF81C784);
+const Color soilBrown = Color(0xFF8D6E63);
+const Color darkSoil = Color(0xFF6D4C41);
+const Color lightBeige = Color(0xFFFDFBF7);
+const Color skyBlue = Color(0xFFF0FAFB);
+
+class BestCropApp extends StatelessWidget {
+  const BestCropApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Best Crop Price',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: lightBeige,
+        colorScheme: const ColorScheme.light(
+          primary: grassGreen,
+          secondary: soilBrown,
+          surface: Colors.white,
+          background: lightBeige,
+        ),
+        fontFamily: 'Roboto',
+      ),
+      home: const LandingScreen(),
+    );
+  }
+}
+
+// --- MAIN LANDING SCREEN ---
+class LandingScreen extends StatefulWidget {
+  const LandingScreen({super.key});
+
+  @override
+  State<LandingScreen> createState() => _LandingScreenState();
+}
+
+class _LandingScreenState extends State<LandingScreen> {
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _scrollNotifier = ValueNotifier(0.0);
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      _scrollNotifier.value = _scrollController.offset;
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _scrollNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final vh = math.max(size.height, 100.0); // Guard against Size.zero
+    final vw = math.max(size.width, 100.0);
+
+    // Define scroll durations for hijacking - Increased to make scrolling slower and smoother
+    final heroDuration = vh * 2.5;
+    final featuresDuration = vh * 3.5;
+    final visualDuration = vh * 2.5;
+    final howItWorksDuration = vh * 2.5;
+
+    // Calculate absolute start offsets
+    final heroStart = 0.0;
+    final featuresStart = heroDuration + vh;
+    final visualStart = featuresStart + featuresDuration + vh;
+    final howItWorksStart = visualStart + visualDuration + vh;
+
+    return Scaffold(
+      backgroundColor: lightBeige,
+      body: Stack(
+        children: [
+          // Dynamic Background blending based on scroll
+          Positioned.fill(
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollNotifier,
+              builder: (context, scrollValue, child) {
+                double progress = howItWorksStart > 0 ? (scrollValue / howItWorksStart).clamp(0.0, 1.0) : 0.0;
+                Color? bgColor = Color.lerp(skyBlue, lightBeige, progress);
+                return Container(color: bgColor);
+              },
+            ),
+          ),
+
+          Positioned.fill(
+            child: ListView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              children: [
+                StickyWrapper(
+                  scrollNotifier: _scrollNotifier,
+                  startOffset: heroStart,
+                  stickyDuration: heroDuration,
+                  vh: vh,
+                  builder: (context, relativeScrollNotifier) => HeroSection(relativeScrollNotifier: relativeScrollNotifier, vh: vh, stickyDuration: heroDuration),
+                ),
+                StickyWrapper(
+                  scrollNotifier: _scrollNotifier,
+                  startOffset: featuresStart,
+                  stickyDuration: featuresDuration,
+                  vh: vh,
+                  builder: (context, relativeScrollNotifier) => FeaturesSection(relativeScrollNotifier: relativeScrollNotifier, vh: vh, stickyDuration: featuresDuration),
+                ),
+                StickyWrapper(
+                  scrollNotifier: _scrollNotifier,
+                  startOffset: visualStart,
+                  stickyDuration: visualDuration,
+                  vh: vh,
+                  builder: (context, relativeScrollNotifier) => InteractiveVisualSection(relativeScrollNotifier: relativeScrollNotifier, vh: vh, stickyDuration: visualDuration),
+                ),
+                StickyWrapper(
+                  scrollNotifier: _scrollNotifier,
+                  startOffset: howItWorksStart,
+                  stickyDuration: howItWorksDuration,
+                  vh: vh,
+                  builder: (context, relativeScrollNotifier) => HowItWorksSection(relativeScrollNotifier: relativeScrollNotifier, vh: vh, stickyDuration: howItWorksDuration),
+                ),
+                SizedBox(
+                  height: vh,
+                  child: const Center(child: FinalCtaSection()),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// --- STICKY WRAPPER ARCHITECTURE ---
+class StickyWrapper extends StatelessWidget {
+  final ValueNotifier<double> scrollNotifier;
+  final double startOffset;
+  final double stickyDuration;
+  final double vh;
+  final Widget Function(BuildContext context, ValueNotifier<double> progressNotifier) builder;
+
+  const StickyWrapper({
+    super.key,
+    required this.scrollNotifier,
+    required this.startOffset,
+    required this.stickyDuration,
+    required this.vh,
+    required this.builder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: stickyDuration + vh,
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ValueListenableBuilder<double>(
+          valueListenable: scrollNotifier,
+          builder: (context, scroll, child) {
+            double relativeScroll = scroll - startOffset;
+            double stickyOffset = relativeScroll.clamp(0.0, stickyDuration);
+            
+            return Transform.translate(
+              offset: Offset(0, stickyOffset),
+              child: SizedBox(
+                height: vh,
+                width: double.infinity,
+                child: child,
+              ),
+            );
+          },
+          child: _ProgressProvider(
+            scrollNotifier: scrollNotifier,
+            startOffset: startOffset,
+            stickyDuration: stickyDuration,
+            builder: builder,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgressProvider extends StatefulWidget {
+  final ValueNotifier<double> scrollNotifier;
+  final double startOffset;
+  final double stickyDuration;
+  final Widget Function(BuildContext context, ValueNotifier<double> progressNotifier) builder;
+
+  const _ProgressProvider({
+    required this.scrollNotifier,
+    required this.startOffset,
+    required this.stickyDuration,
+    required this.builder,
+  });
+
+  @override
+  State<_ProgressProvider> createState() => _ProgressProviderState();
+}
+
+class _ProgressProviderState extends State<_ProgressProvider> {
+  late ValueNotifier<double> relativeScrollNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    relativeScrollNotifier = ValueNotifier(0.0);
+    widget.scrollNotifier.addListener(_updateProgress);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateProgress());
+  }
+
+  void _updateProgress() {
+    double relativeScroll = widget.scrollNotifier.value - widget.startOffset;
+    if (relativeScrollNotifier.value != relativeScroll) {
+      relativeScrollNotifier.value = relativeScroll;
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.scrollNotifier.removeListener(_updateProgress);
+    relativeScrollNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, relativeScrollNotifier);
+  }
+}
+
+// --- 1. HERO SECTION (Cinematic Parallax & Camera) ---
+class HeroSection extends StatelessWidget {
+  final ValueNotifier<double> relativeScrollNotifier;
+  final double vh;
+  final double stickyDuration;
+
+  const HeroSection({super.key, required this.relativeScrollNotifier, required this.vh, required this.stickyDuration});
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: ValueListenableBuilder<double>(
+        valueListenable: relativeScrollNotifier,
+        builder: (context, relativeScroll, child) {
+          double progress = stickyDuration > 0 ? (relativeScroll / stickyDuration).clamp(0.0, 1.0) : 0.0;
+          double scale = 1.0 + (progress * 0.4); 
+          double translateY = progress * vh * 0.5; 
+          double rotateX = progress * 0.3; 
+          double opacity = (1 - (progress * 3)).clamp(0.0, 1.0);
+          double sunY = -0.5 + progress;
+
+          return Transform(
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..translate(0.0, translateY, 0.0)
+              ..rotateX(rotateX)
+              ..scale(scale, scale, 1.0),
+            alignment: Alignment.center,
+            child: ClipPath(
+              clipper: OrganicWaveClipper(),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment(0, sunY),
+                    radius: 1.5,
+                    colors: const [Colors.white, skyBlue, lightGreen],
+                    stops: const [0.0, 0.4, 1.0],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    const Positioned.fill(child: FloatingParticles()),
+                    
+                    Positioned(
+                      bottom: -100 * progress,
+                      left: 0, right: 0,
+                      child: Transform.scale(
+                        scale: 1.0 + progress * 1.5,
+                        child: Opacity(
+                          opacity: (1 - progress * 1.5).clamp(0.0, 1.0),
+                          child: const Icon(Icons.grass_rounded, size: 300, color: grassGreen),
+                        ),
+                      ),
+                    ),
+
+                    Opacity(
+                      opacity: opacity,
+                      child: SafeArea(
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min, // PREVENT INFINITE HEIGHT
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.5),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [BoxShadow(color: grassGreen.withOpacity(0.2), blurRadius: 30)]
+                                  ),
+                                  child: const Icon(Icons.spa_rounded, size: 80, color: grassGreen),
+                                ),
+                                const SizedBox(height: 40),
+                                const Text(
+                                  'Predict Crop Prices\nWith Intelligence',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 56,
+                                    height: 1.1,
+                                    fontWeight: FontWeight.w900,
+                                    color: darkSoil,
+                                    letterSpacing: -2,
+                                    shadows: [
+                                      Shadow(color: Colors.white, blurRadius: 30, offset: Offset(0, 4)),
+                                      Shadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
+                                    ]
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                const Text(
+                                  'AI-powered insights for better farming decisions and maximized yields.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: soilBrown),
+                                ),
+                                const SizedBox(height: 60),
+                                MagneticHoverWidget(child: HeroCtaButton(onTap: () {})),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    Positioned(
+                      bottom: 40, left: 0, right: 0,
+                      child: Opacity(opacity: opacity, child: const ScrollIndicator()),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// --- 2. FEATURES SECTION (Horizontal Scroll) ---
+class FeaturesSection extends StatelessWidget {
+  final ValueNotifier<double> relativeScrollNotifier;
+  final double vh;
+  final double stickyDuration;
+
+  const FeaturesSection({super.key, required this.relativeScrollNotifier, required this.vh, required this.stickyDuration});
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final vw = math.max(size.width, 100.0); // Guard against zero width
+    
+    return RepaintBoundary(
+      child: Container(
+        width: vw,
+        height: vh,
+        color: Colors.transparent,
+        child: Stack(
+          children: [
+            Positioned(
+              top: vh * 0.15,
+              left: 0, right: 0,
+              child: ValueListenableBuilder<double>(
+                valueListenable: relativeScrollNotifier,
+                builder: (context, relativeScroll, child) {
+                  double enterProgress = ((relativeScroll + vh) / vh).clamp(0.0, 1.0);
+                  double progress = stickyDuration > 0 ? (relativeScroll / stickyDuration).clamp(0.0, 1.0) : 0.0;
+                  
+                  double opacity = (progress > 0.9) ? (1 - progress) * 10 : enterProgress;
+                  double translateY = (1 - enterProgress) * 50;
+                  
+                  return Opacity(
+                    opacity: opacity.clamp(0.0, 1.0),
+                    child: Transform.translate(
+                      offset: Offset(0, translateY),
+                      child: child,
+                    ),
+                  );
+                },
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min, // PREVENT INFINITE HEIGHT
+                  children: [
+                    Text(
+                      'Empowering Your Harvest',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: darkSoil, letterSpacing: -1),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Everything you need to maximize your agricultural yield and profits.',
+                      style: TextStyle(fontSize: 20, color: soilBrown),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            Positioned(
+              top: vh * 0.35,
+              left: 0,
+              width: vw * 4, // Explicit large width instead of negative right to avoid layout crash
+              child: ValueListenableBuilder<double>(
+                valueListenable: relativeScrollNotifier,
+                builder: (context, relativeScroll, child) {
+                  double enterProgress = ((relativeScroll + vh) / vh).clamp(0.0, 1.0);
+                  double progress = stickyDuration > 0 ? (relativeScroll / stickyDuration).clamp(0.0, 1.0) : 0.0;
+                  
+                  double maxScroll = vw + 1600;
+                  double enterSlide = (1 - enterProgress) * (vw * 0.5);
+                  double slideX = enterSlide + (vw - (progress * maxScroll));
+                  
+                  return Transform.translate(
+                    offset: Offset(slideX, 0),
+                    child: Opacity(
+                      opacity: enterProgress,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Row(
+                  children: [
+                    SizedBox(width: vw * 0.2),
+                    const HoverTiltWidget(child: FeatureCard(
+                      icon: Icons.auto_graph_rounded, title: 'Price Prediction', 
+                      description: 'Machine learning models forecast crop values with high accuracy.', width: 350
+                    )),
+                    const SizedBox(width: 40),
+                    const HoverTiltWidget(child: FeatureCard(
+                      icon: Icons.pie_chart_rounded, title: 'Market Trends', 
+                      description: 'Visualize historical data and demand shifts instantly.', width: 350
+                    )),
+                    const SizedBox(width: 40),
+                    const HoverTiltWidget(child: FeatureCard(
+                      icon: Icons.cloud_rounded, title: 'Weather Impact', 
+                      description: 'Analyze how upcoming weather patterns affect market shortages.', width: 350
+                    )),
+                    const SizedBox(width: 40),
+                    const HoverTiltWidget(child: FeatureCard(
+                      icon: Icons.lightbulb_rounded, title: 'Smart Suggestions', 
+                      description: 'Get tailored advice on when to hold or sell your harvest.', width: 350
+                    )),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class FeatureCard extends StatefulWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final double width;
+
+  const FeatureCard({super.key, required this.icon, required this.title, required this.description, required this.width});
+
+  @override
+  State<FeatureCard> createState() => _FeatureCardState();
+}
+
+class _FeatureCardState extends State<FeatureCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedScale(
+        scale: _isHovered ? 1.05 : 1.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutBack,
+        child: Container(
+          width: widget.width,
+          padding: const EdgeInsets.all(40),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: soilBrown.withOpacity(_isHovered ? 0.3 : 0.15),
+                blurRadius: _isHovered ? 50 : 25,
+                offset: Offset(0, _isHovered ? 25 : 10),
+              ),
+            ],
+            border: Border.all(
+                color: _isHovered ? grassGreen.withOpacity(0.5) : Colors.transparent,
+                width: 2),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(color: skyBlue, borderRadius: BorderRadius.circular(24)),
+                child: Icon(widget.icon, size: 40, color: grassGreen),
+              ),
+              const SizedBox(height: 32),
+              Text(widget.title, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: darkSoil)),
+              const SizedBox(height: 16),
+              Text(widget.description, style: const TextStyle(fontSize: 18, color: soilBrown, height: 1.5)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// --- 3. INTERACTIVE VISUAL SECTION (Data Visualization) ---
+class InteractiveVisualSection extends StatelessWidget {
+  final ValueNotifier<double> relativeScrollNotifier;
+  final double vh;
+  final double stickyDuration;
+
+  const InteractiveVisualSection({super.key, required this.relativeScrollNotifier, required this.vh, required this.stickyDuration});
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: Container(
+        color: Colors.white.withOpacity(0.5),
+        child: ValueListenableBuilder<double>(
+          valueListenable: relativeScrollNotifier,
+          builder: (context, relativeScroll, child) {
+            double enterProgress = ((relativeScroll + vh) / vh).clamp(0.0, 1.0);
+            double progress = stickyDuration > 0 ? (relativeScroll / stickyDuration).clamp(0.0, 1.0) : 0.0;
+            double eased = Curves.easeInOutCubic.transform(progress);
+            
+            return Opacity(
+              opacity: enterProgress,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(
+                    top: vh * 0.1,
+                    child: Opacity(
+                      opacity: (enterProgress + eased).clamp(0.0, 1.0),
+                      child: const Column(
+                      mainAxisSize: MainAxisSize.min, // PREVENT INFINITE HEIGHT
+                      children: [
+                         Text('Real-time Intelligence', style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: darkSoil, letterSpacing: -1)),
+                         SizedBox(height: 16),
+                         Text('Dynamic charts and predictions built for modern agriculture.', style: TextStyle(fontSize: 20, color: soilBrown)),
+                      ]
+                    )
+                  )
+                ),
+                
+                Transform(
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, 0.001)
+                    ..translate(-150 * eased, -80 * eased, -200 * eased)
+                    ..rotateZ(-0.2 * eased)
+                    ..rotateY(0.3 * eased),
+                  alignment: Alignment.center,
+                  child: Opacity(
+                    opacity: (eased * 1.5).clamp(0.0, 0.6),
+                    child: _buildMockChart(grassGreen, progress),
+                  ),
+                ),
+                
+                Transform(
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, 0.001)
+                    ..translate(150 * eased, -40 * eased, -100 * eased)
+                    ..rotateZ(0.15 * eased)
+                    ..rotateY(-0.2 * eased),
+                  alignment: Alignment.center,
+                  child: Opacity(
+                    opacity: (eased * 1.5).clamp(0.0, 0.8),
+                    child: _buildMockChart(soilBrown, progress),
+                  ),
+                ),
+                
+                Transform(
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, 0.001)
+                    ..translate(0.0, 60 * (1 - eased), 0.0)
+                    ..scale(0.8 + (0.2 * eased), 0.8 + (0.2 * eased), 1.0),
+                  alignment: Alignment.center,
+                  child: Opacity(
+                    opacity: (eased * 2).clamp(0.0, 1.0),
+                    child: Container(
+                      width: 360,
+                      padding: const EdgeInsets.all(40),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [BoxShadow(color: darkSoil.withOpacity(0.25), blurRadius: 60, offset: const Offset(0, 30))],
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Wheat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: darkSoil)),
+                              Icon(Icons.trending_up, color: grassGreen, size: 32),
+                            ],
+                          ),
+                          const SizedBox(height: 32),
+                          Text(
+                            '+${(eased * 18.5).toStringAsFixed(1)}%',
+                            style: TextStyle(
+                              color: grassGreen,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 56,
+                              shadows: [Shadow(color: grassGreen.withOpacity(0.4), blurRadius: 15)]
+                            )
+                          ),
+                          const SizedBox(height: 12),
+                          const Text('Expected next 30 days', style: TextStyle(color: soilBrown, fontSize: 18)),
+                          const SizedBox(height: 40),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: eased * 0.85,
+                              backgroundColor: lightBeige,
+                              color: grassGreen,
+                              minHeight: 12,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMockChart(Color color, double progress) {
+    return Container(
+      width: 420,
+      height: 280,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: color.withOpacity(0.3), width: 2),
+        boxShadow: [BoxShadow(color: color.withOpacity(0.25), blurRadius: 30, offset: const Offset(0, 15))],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(6, (index) {
+          double maxH = 50.0 + (index * 30) + (index.isEven ? 40 : 0);
+          double currentH = maxH * Curves.easeOutBack.transform(progress);
+          return Container(
+            width: 36,
+            height: currentH.clamp(0.0, maxH),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [color.withOpacity(0.5), color], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+              borderRadius: BorderRadius.circular(10)
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+// --- 4. HOW IT WORKS (Morphing & Connections) ---
+class HowItWorksSection extends StatelessWidget {
+  final ValueNotifier<double> relativeScrollNotifier;
+  final double vh;
+  final double stickyDuration;
+
+  const HowItWorksSection({super.key, required this.relativeScrollNotifier, required this.vh, required this.stickyDuration});
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: Container(
+        color: Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 60),
+        child: ValueListenableBuilder<double>(
+          valueListenable: relativeScrollNotifier,
+          builder: (context, relativeScroll, child) {
+            double enterProgress = ((relativeScroll + vh) / vh).clamp(0.0, 1.0);
+            double progress = stickyDuration > 0 ? (relativeScroll / stickyDuration).clamp(0.0, 1.0) : 0.0;
+
+            return Opacity(
+              opacity: enterProgress,
+              child: Row(
+                 children: [
+                   Expanded(
+                     child: Stack(
+                       alignment: Alignment.center,
+                       children: [
+                         Transform.rotate(
+                           angle: progress * math.pi,
+                         child: Container(
+                           width: 400, height: 400,
+                           decoration: BoxDecoration(
+                             shape: BoxShape.circle,
+                             border: Border.all(color: grassGreen.withOpacity(0.3), width: 2)
+                           ),
+                         )
+                       ),
+                       Transform.rotate(
+                         angle: -progress * math.pi * 0.5,
+                         child: Container(
+                           width: 250, height: 250,
+                           decoration: BoxDecoration(
+                             shape: BoxShape.circle,
+                             border: Border.all(color: lightGreen.withOpacity(0.5), width: 4)
+                           ),
+                         )
+                       ),
+                       Transform.scale(
+                         scale: 0.5 + (progress * 0.5),
+                         child: const Icon(Icons.psychology_rounded, size: 120, color: grassGreen)
+                       )
+                     ]
+                   )
+                 ),
+                 
+                 Expanded(
+                   child: Column(
+                     mainAxisAlignment: MainAxisAlignment.center,
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     mainAxisSize: MainAxisSize.min, // PREVENT INFINITE HEIGHT
+                     children: [
+                        const Text('The Process', style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: darkSoil)),
+                        const SizedBox(height: 80),
+                        _buildStep(1, 'Input Your Data', 'Select crop and location details.', Icons.edit_document, progress, 0.0, 0.33),
+                        _buildStep(2, 'AI Analysis', 'Our engine processes historical patterns.', Icons.memory, progress, 0.33, 0.66),
+                        _buildStep(3, 'Get Predictions', 'Receive actionable insights instantly.', Icons.insights, progress, 0.66, 1.0, isLast: true),
+                     ]
+                   )
+                 )
+               ]
+            );
+          }
+        )
+      )
+    );
+  }
+
+  Widget _buildStep(int step, String title, String desc, IconData icon, double globalProgress, double start, double end, {bool isLast = false}) {
+    double localProgress = ((globalProgress - start) / (end - start)).clamp(0.0, 1.0);
+    double eased = Curves.easeOutBack.transform(localProgress);
+    
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            Transform.scale(
+              scale: localProgress > 0 ? eased : 0.0,
+              child: Container(
+                width: 70, height: 70,
+                decoration: BoxDecoration(
+                  color: grassGreen, 
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: grassGreen.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 10))],
+                ),
+                child: Center(child: Icon(icon, color: Colors.white, size: 32)),
+              ),
+            ),
+            if (!isLast)
+              Container(
+                width: 4, height: 80,
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(color: soilBrown.withOpacity(0.2), borderRadius: BorderRadius.circular(2)),
+                alignment: Alignment.topCenter,
+                child: FractionallySizedBox(
+                  heightFactor: localProgress,
+                  child: Container(decoration: BoxDecoration(color: grassGreen, borderRadius: BorderRadius.circular(2))),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(width: 40),
+        Expanded(
+          child: Opacity(
+            opacity: localProgress,
+            child: Transform.translate(
+              offset: Offset(50 * (1 - eased), 0),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16.0, bottom: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min, // PREVENT INFINITE HEIGHT
+                  children: [
+                    Text('STEP $step', style: const TextStyle(color: grassGreen, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1.5)),
+                    const SizedBox(height: 12),
+                    Text(title, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: darkSoil)),
+                    const SizedBox(height: 12),
+                    Text(desc, style: const TextStyle(fontSize: 18, color: soilBrown, height: 1.5)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// --- 5. FINAL CTA SECTION ---
+class FinalCtaSection extends StatefulWidget {
+  const FinalCtaSection({super.key});
+
+  @override
+  State<FinalCtaSection> createState() => _FinalCtaSectionState();
+}
+
+class _FinalCtaSectionState extends State<FinalCtaSection> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 40),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [skyBlue, lightBeige], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        borderRadius: BorderRadius.circular(50),
+        boxShadow: [BoxShadow(color: soilBrown.withOpacity(0.15), blurRadius: 60, offset: const Offset(0, 30))],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Ready to Grow Your Profits?', textAlign: TextAlign.center, style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: darkSoil, letterSpacing: -1)),
+          const SizedBox(height: 50),
+          AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, child) {
+              return MagneticHoverWidget(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40),
+                    boxShadow: [BoxShadow(color: grassGreen.withOpacity(0.3 * _pulseController.value), blurRadius: 40 + (20 * _pulseController.value), spreadRadius: 5 * _pulseController.value)],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: grassGreen,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 24),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+                      elevation: 0,
+                    ),
+                    child: const Text('Get Started Now', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// --- UTILITY WIDGETS ---
+class FloatingParticles extends StatefulWidget {
+  const FloatingParticles({super.key});
+
+  @override
+  State<FloatingParticles> createState() => _FloatingParticlesState();
+}
+
+class _FloatingParticlesState extends State<FloatingParticles> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 10))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Stack(
+          children: List.generate(12, (index) {
+            double time = _controller.value * 2 * math.pi;
+            double xOffset = math.sin(time + index) * 80;
+            double yOffset = math.cos(time + index * 2) * 80;
+            return Positioned(
+              left: (MediaQuery.of(context).size.width / 12) * index + xOffset,
+              top: 100.0 + (index * 80) + yOffset,
+              child: Opacity(
+                  opacity: 0.15,
+                  child: Transform.rotate(
+                      angle: time + index,
+                      child: const Icon(Icons.eco, color: Colors.white, size: 50))),
+            );
+          }),
+        );
+      },
+    );
+  }
+}
+
+class OrganicWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    path.lineTo(0, size.height - 120);
+    path.quadraticBezierTo(size.width / 4, size.height, size.width / 2, size.height - 60);
+    path.quadraticBezierTo(size.width * 0.75, size.height - 120, size.width, size.height - 30);
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+class ScrollIndicator extends StatefulWidget {
+  const ScrollIndicator({super.key});
+  @override
+  State<ScrollIndicator> createState() => _ScrollIndicatorState();
+}
+
+class _ScrollIndicatorState extends State<ScrollIndicator> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _controller.value * 20),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min, // PREVENT INFINITE HEIGHT
+            children: [
+              Text('Scroll to explore', style: TextStyle(color: soilBrown, fontWeight: FontWeight.bold, fontSize: 16)),
+              SizedBox(height: 12),
+              Icon(Icons.keyboard_arrow_down, color: soilBrown, size: 30),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class HeroCtaButton extends StatefulWidget {
+  final VoidCallback onTap;
+  const HeroCtaButton({super.key, required this.onTap});
+  @override
+  State<HeroCtaButton> createState() => _HeroCtaButtonState();
+}
+
+class _HeroCtaButtonState extends State<HeroCtaButton> {
+  bool _isHovered = false;
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 22),
+          decoration: BoxDecoration(
+            color: _isHovered ? darkSoil : grassGreen,
+            borderRadius: BorderRadius.circular(40),
+            boxShadow: [
+              BoxShadow(
+                  color: (_isHovered ? darkSoil : grassGreen).withOpacity(0.5),
+                  blurRadius: _isHovered ? 30 : 15,
+                  offset: const Offset(0, 10))
+            ],
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Get Started', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+              SizedBox(width: 12),
+              Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class MagneticHoverWidget extends StatefulWidget {
+  final Widget child;
+  const MagneticHoverWidget({super.key, required this.child});
+  @override
+  State<MagneticHoverWidget> createState() => _MagneticHoverWidgetState();
+}
+
+class _MagneticHoverWidgetState extends State<MagneticHoverWidget> {
+  double x = 0;
+  double y = 0;
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() { isHovered = false; x = 0; y = 0; }),
+      onHover: (details) {
+        final RenderBox box = context.findRenderObject() as RenderBox;
+        final centerX = box.size.width / 2;
+        final centerY = box.size.height / 2;
+        setState(() {
+          x = (details.localPosition.dx - centerX) / centerX; 
+          y = (details.localPosition.dy - centerY) / centerY; 
+        });
+      },
+      child: TweenAnimationBuilder(
+        tween: Tween<Offset>(begin: Offset.zero, end: isHovered ? Offset(x * 10, y * 10) : Offset.zero),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutBack,
+        builder: (context, Offset offset, child) {
+          return Transform.translate(
+            offset: offset,
+            child: widget.child,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class HoverTiltWidget extends StatefulWidget {
+  final Widget child;
+  const HoverTiltWidget({super.key, required this.child});
+  @override
+  State<HoverTiltWidget> createState() => _HoverTiltWidgetState();
+}
+
+class _HoverTiltWidgetState extends State<HoverTiltWidget> {
+  double x = 0;
+  double y = 0;
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() { isHovered = false; x = 0; y = 0; }),
+      onHover: (details) {
+        final RenderBox box = context.findRenderObject() as RenderBox;
+        final centerX = box.size.width / 2;
+        final centerY = box.size.height / 2;
+        setState(() {
+          x = (details.localPosition.dx - centerX) / centerX;
+          y = (details.localPosition.dy - centerY) / centerY;
+        });
+      },
+      child: TweenAnimationBuilder(
+        tween: Tween<Offset>(begin: Offset.zero, end: isHovered ? Offset(x, y) : Offset.zero),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutExpo,
+        builder: (context, Offset offset, child) {
+          return Transform(
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001) 
+              ..rotateX(-offset.dy * 0.15) 
+              ..rotateY(offset.dx * 0.15),
+            alignment: Alignment.center,
+            child: widget.child,
+          );
+        },
+      ),
+    );
+  }
+}
